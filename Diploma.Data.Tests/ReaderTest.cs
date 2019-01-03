@@ -6,7 +6,7 @@ namespace Diploma.Data.Tests
     [TestClass]
     public class ReaderTest
     {
-        private readonly string filePath = @"C:\Users\ablyz\Desktop\Diploma\Program\data.csv";
+        private readonly string filePath = @"C:\Users\ablyz\Desktop\Diploma\Program\DataSet\data.csv";
         private Reader reader;
 
         [TestInitialize]
