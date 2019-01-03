@@ -1,4 +1,6 @@
-﻿namespace Diploma.Model
+﻿using System.Collections.Generic;
+
+namespace Diploma.Model
 {
     public class Patient
     {
@@ -10,5 +12,6 @@
         public Attention AttentionResult { get; set; }
         public EmotionalIntelligence EmotionalIntelligenceResult { get; set; }
         public Intellection IntellectionResult { get; set; }
+        public List<double> TestsValues { get; set; }
     }
 }
