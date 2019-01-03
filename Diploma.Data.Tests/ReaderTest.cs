@@ -7,12 +7,12 @@ namespace Diploma.Data.Tests
     public class ReaderTest
     {
         private readonly string filePath = @"C:\Users\ablyz\Desktop\Diploma\Program\DataSet\data.csv";
-        private Reader reader;
+        private PatientReader reader;
 
         [TestInitialize]
         public void Setup()
         {
-            reader = new Reader();
+            reader = new PatientReader();
         }
 
         [TestMethod]
@@ -35,7 +35,7 @@ namespace Diploma.Data.Tests
             var patients = reader.ReadSetOfPatientsFromCsv(filePath);
 
             //Assert
-            Assert.AreSame(patients.Count, amountOfPatients);
+            Assert.IsTrue(patients.Count == amountOfPatients);
         }
 
 
@@ -51,8 +51,8 @@ namespace Diploma.Data.Tests
             var controlPatient = patients.Where(p => p.Id == id).First();
 
             //Assert
-            Assert.AreSame(controlPatient.Name, name);
-            Assert.AreSame(controlPatient.AttentionResult.MunstAttentionTest, munstAttentionTestResult);
+            Assert.IsTrue(controlPatient.Name == name);
+            Assert.IsTrue(controlPatient.AttentionResult.MunstAttentionTest.Result == munstAttentionTestResult);
         }
     }
 }
