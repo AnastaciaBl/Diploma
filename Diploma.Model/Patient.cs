@@ -2,6 +2,7 @@
 {
     public class Patient
     {
+        public int Id { get; set; }
         public int RegistrationYear { get; set; }
         public string Name { get; set; }
         public double FinalResult { get; set; }
