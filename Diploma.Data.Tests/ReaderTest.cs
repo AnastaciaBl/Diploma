@@ -44,7 +44,7 @@ namespace Diploma.Data.Tests
         [DataRow(33, "Чабан", 14)]
         [DataRow(112, "Чубарь Ю.Н.", 13)]
         [DataRow(1, "Коваль", 11)]
-        public void List_Has_Correct_Data(int id, string name, double munstAttentionTestResult)
+        public void List_Has_Correct_Data_MunstAttentionTest(int id, string name, double munstAttentionTestResult)
         {
             //Act
             var patients = reader.ReadSetOfPatientsFromCsv(filePath);
@@ -53,6 +53,35 @@ namespace Diploma.Data.Tests
             //Assert
             Assert.IsTrue(controlPatient.Name == name);
             Assert.IsTrue(controlPatient.AttentionResult.MunstAttentionTest.Result == munstAttentionTestResult);
+        }
+
+        [DataTestMethod]
+        [DataRow(8, "Соловьев", 4)]
+        [DataRow(33, "Чабан", 8)]
+        [DataRow(112, "Чубарь Ю.Н.", 9)]
+        [DataRow(1, "Коваль", 7)]
+        public void List_Has_Correct_Data_EbbinghouseTest(int id, string name, double ebbinghouseTestResult)
+        {
+            //Act
+            var patients = reader.ReadSetOfPatientsFromCsv(filePath);
+            var controlPatient = patients.Where(p => p.Id == id).First();
+
+            //Assert
+            Assert.IsTrue(controlPatient.Name == name);
+            Assert.IsTrue(controlPatient.IntellectionResult.EbbinghouseTest.Result == ebbinghouseTestResult);
+        }
+
+        [DataTestMethod]
+        [DataRow(94, "Шевчук В.К.", -1)]
+        public void Correct_Handle_Empty_Data(int id, string name, double semanticMemoryTestResult)
+        {
+            //Act
+            var patients = reader.ReadSetOfPatientsFromCsv(filePath);
+            var controlPatient = patients.Where(p => p.Id == id).First();
+
+            //Assert
+            Assert.IsTrue(controlPatient.Name == name);
+            Assert.IsTrue(controlPatient.MemoryResult.SemanticMemoryTest.Result == semanticMemoryTestResult);
         }
     }
 }
