@@ -12,6 +12,15 @@ namespace Diploma.Model
         public Attention AttentionResult { get; set; }
         public EmotionalIntelligence EmotionalIntelligenceResult { get; set; }
         public Intellection IntellectionResult { get; set; }
-        public List<double> TestsValues { get; set; }
+        //public List<double> TestsValues { get; set; }
+
+        public Patient()
+        {
+            MemoryResult = new Memory();
+            AttentionResult = new Attention();
+            EmotionalIntelligenceResult = new EmotionalIntelligence();
+            IntellectionResult = new Intellection();
+            //TestsValues = new List<double>();
+        }
     }
 }

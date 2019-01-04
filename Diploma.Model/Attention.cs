@@ -7,5 +7,12 @@ namespace Diploma.Model
         public TestResult MunstAttentionTest { get; set; }
         public CorTableAttention CorTableAttentionTest { get; set; }
         public SchulteTableAttention SchulteTableAttentionTest { get; set; }
+
+        public Attention()
+        {
+            MunstAttentionTest = new TestResult();
+            CorTableAttentionTest = new CorTableAttention();
+            SchulteTableAttentionTest = new SchulteTableAttention();
+        }
     }
 }

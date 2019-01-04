@@ -12,5 +12,19 @@
         public TestResult PATest { get; set; }
         public TestResult UATest { get; set; }
         public TestResult OUTest { get; set; }
+
+        public EmotionalIntelligence()
+        {
+            MPTest = new TestResult();
+            MUTest = new TestResult();
+            VPTest = new TestResult();
+            VUTest = new TestResult();
+            VATest = new TestResult();
+            MAETest = new TestResult();
+            VAETest = new TestResult();
+            PATest = new TestResult();
+            UATest = new TestResult();
+            OUTest = new TestResult();
+        }
     }
 }
