@@ -8,5 +8,11 @@ namespace Diploma.Algorithms.EM
 {
     class EMAlgorithm
     {
+        public int AmountOfClusters { get; protected set; }
+
+        public EMAlgorithm(int amountOfClusters)
+        {
+
+        }
     }
 }

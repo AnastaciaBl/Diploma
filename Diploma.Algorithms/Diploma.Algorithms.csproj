@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Distribution\IDistribution.cs" />
+    <Compile Include="Distribution\NormalDistribution.cs" />
     <Compile Include="EM\EMAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
