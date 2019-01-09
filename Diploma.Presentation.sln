@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.Model", "Diploma.Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diploma.Data.Tests", "Diploma.Data.Tests\Diploma.Data.Tests.csproj", "{17D7394F-BB72-4252-A009-2FAEA3CF30FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diploma.Algorithms", "Diploma.Algorithms\Diploma.Algorithms.csproj", "{29025811-1872-4830-8201-E8F44F183D4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diploma.Algorithms.Tests", "Diploma.Algorithms.Tests\Diploma.Algorithms.Tests.csproj", "{52DA95B6-D75A-40D3-8684-86DE02067CE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{17D7394F-BB72-4252-A009-2FAEA3CF30FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17D7394F-BB72-4252-A009-2FAEA3CF30FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17D7394F-BB72-4252-A009-2FAEA3CF30FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29025811-1872-4830-8201-E8F44F183D4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29025811-1872-4830-8201-E8F44F183D4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29025811-1872-4830-8201-E8F44F183D4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29025811-1872-4830-8201-E8F44F183D4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52DA95B6-D75A-40D3-8684-86DE02067CE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52DA95B6-D75A-40D3-8684-86DE02067CE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52DA95B6-D75A-40D3-8684-86DE02067CE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52DA95B6-D75A-40D3-8684-86DE02067CE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
