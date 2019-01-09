@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Diploma.Algorithms.EM
 {
-    class EMAlgorithm
+    public class EMAlgorithm
     {
         public int AmountOfClusters { get; protected set; }
 

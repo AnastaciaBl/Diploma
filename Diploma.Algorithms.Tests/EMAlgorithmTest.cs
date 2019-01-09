@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Diploma.Algorithms.Tests
 {
@@ -9,6 +8,7 @@ namespace Diploma.Algorithms.Tests
         [TestMethod]
         public void TestMethod1()
         {
+            Assert.IsTrue(false);
         }
     }
 }

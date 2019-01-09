@@ -1,6 +1,6 @@
 ﻿namespace Diploma.Algorithms.Distribution
 {
-    interface IDistribution
+    public interface IDistribution
     {
         //shift factor
         double M { get; set; }
