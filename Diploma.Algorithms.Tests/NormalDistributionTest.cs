@@ -14,10 +14,10 @@ namespace Diploma.Algorithms.Tests
         public void NormalDistribution_Should_Return_Correct_Probability_Value(double m, double g, double etalon)
         {
             //Arrange
-            var distribution = new NormalDistribution(m, g);
+            var distribution = new NormalDistribution();
 
             //Act
-            var answer = distribution.CountProbabilityFunctionResult(1);
+            var answer = distribution.CountProbabilityFunctionResult(m, g, 1);
 
             //Assert
             Assert.IsTrue(etalon == answer);
