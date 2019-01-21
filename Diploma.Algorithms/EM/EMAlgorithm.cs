@@ -47,22 +47,22 @@ namespace Diploma.Algorithms.EM
 
         private void EStep()
         {
-            var probabilities = CountProbabilitiesForEachPoint();
-
+            var probabilityInPoint = CountProbabilitiesForEachPoint();
+            var averages = CountAverage(probabilityInPoint);
+            var dispersions = CountDispersion(averages, probabilityInPoint);
         }
 
         private double[,] CountProbabilitiesForEachPoint()
         {
-            var probabilities = new double[DataSetValues.Count, AmountOfClusters];
+            var probabilities = new double[AmountOfClusters, DataSetValues.Count];
             for (int i = 0; i < DataSetValues.Count; i++)
             {
                 for (int j = 0; j < AmountOfClusters; j++)
                 {
-                    probabilities[i, j] = Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
+                    probabilities[j, i] = Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
                         HiddenVector[j].GStruct, DataSetValues[i]);
                 }
             }
-
             return probabilities;
         }
 
@@ -72,17 +72,42 @@ namespace Diploma.Algorithms.EM
             for (int i = 0; i < AmountOfClusters; i++)
             {
                 double sumUp = 0;
-                double sumDown = 0;
                 for (int j = 0; j < DataSetValues.Count; j++)
                 {
-                    sumUp += probabilities[j, i] * DataSetValues[j];
-                    sumDown += probabilities[j, i];
+                    sumUp += probabilities[i, j] * DataSetValues[j];
                 }
-                //TODO have to finished a method
-                //averages[i] = 
+
+                averages[i] = sumUp / CountSumOfProbabilitiesInCluster(i, probabilities);
+            }
+            return averages;
+        }
+
+        private double[] CountDispersion(double[] averages, double[,] probabilities)
+        {
+            var dispersions = new double[AmountOfClusters];
+            for (int i = 0; i < AmountOfClusters; i++)
+            {
+                double sum = 0;
+                for (int j = 0; j < DataSetValues.Count; j++)
+                {
+                    sum += probabilities[i, j] * Math.Pow(DataSetValues[j] - averages[i], 2);
+                }
+
+                dispersions[i] = sum / CountSumOfProbabilitiesInCluster(i, probabilities);
             }
 
-            return averages;
+            return dispersions;
+        }
+
+        private double CountSumOfProbabilitiesInCluster(int index, double[,] probabilities)
+        {
+            double sum = 0;
+            for (int j = 0; j < DataSetValues.Count; j++)
+            {
+                sum += probabilities[index, j];
+            }
+
+            return sum;
         }
     }
 }
