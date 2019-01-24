@@ -40,11 +40,14 @@ namespace Diploma.Algorithms.EM
 
         public void SplitOnClusters()
         {
-            while (true)
+            FillHiddenVectorByRandomValues();
+            double oldParameterM = HiddenVector.First().MStruct;
+            double oldParameterG = HiddenVector.First().GStruct;
+            do
             {
                 EStep();
                 MStep();
-            }
+            } while (Math.Abs(oldParameterM - HiddenVector.First().MStruct) < Eps && Math.Abs(oldParameterG - HiddenVector.First().GStruct) < Eps);
         }
 
         private void FillHiddenVectorByRandomValues()
