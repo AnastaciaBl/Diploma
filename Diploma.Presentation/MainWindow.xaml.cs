@@ -12,6 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Diploma.Data;
+using Diploma.Model;
+using Diploma.Algorithms.EM;
+using Diploma.Algorithms.Distribution;
+using System.IO;
 
 namespace Diploma.Presentation
 {
@@ -23,6 +28,21 @@ namespace Diploma.Presentation
         public MainWindow()
         {
             InitializeComponent();
+            var reader = new PatientReader();
+            var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
+            var data = new List<double>();
+            foreach (var p in patients)
+            {
+                data.Add(p.MemoryResult.SemanticMemoryTest.Result);
+            }
+            var algor = new EMAlgorithm(4, new NormalDistribution(), data, 0.0001);
+            algor.SplitOnClusters();
+            using (StreamWriter sw = new StreamWriter("answer.txt"))
+            {
+                for(int i=0;i<data.Count;i++)
+                    sw.WriteLine(data[i] + "    " + algor.Labels[i]);
+            }
+            int a = 0;
         }
     }
 }

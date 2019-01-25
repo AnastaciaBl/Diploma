@@ -98,5 +98,19 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Diploma.Algorithms\Diploma.Algorithms.csproj">
+      <Project>{29025811-1872-4830-8201-e8f44f183d4b}</Project>
+      <Name>Diploma.Algorithms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Diploma.Data\Diploma.Data.csproj">
+      <Project>{e0a74916-ba74-4dd0-bf12-ce42eb168e5c}</Project>
+      <Name>Diploma.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Diploma.Model\Diploma.Model.csproj">
+      <Project>{8867939a-58d5-458f-b911-9e44901fe25f}</Project>
+      <Name>Diploma.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

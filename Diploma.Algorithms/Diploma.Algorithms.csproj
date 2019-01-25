@@ -43,6 +43,7 @@
     <Compile Include="Distribution\IDistribution.cs" />
     <Compile Include="Distribution\NormalDistribution.cs" />
     <Compile Include="EM\EMAlgorithm.cs" />
+    <Compile Include="EM\SEMAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
