@@ -11,80 +11,105 @@ namespace Diploma.Algorithms.EM
     public class EMAlgorithm
     {
         public int AmountOfClusters { get; protected set; }
+        public int AmountOfElements { get; }
         public readonly IDistribution Distribution;
         public readonly List<double> DataSetValues;
         public readonly double Eps;
         public int[] Labels { get; protected set; }
+        protected double[,] Probabilities { get; set; }
         protected struct Parameters
         {
             public double MStruct;
             public double GStruct;
+            public double СStruct;
 
-            public Parameters(double m, double g)
+            public Parameters(double m, double g, double c)
             {
                 MStruct = m;
                 GStruct = g;
+                СStruct = c;
             }
         }
         protected List<Parameters> HiddenVector { get; set; }
-        protected double[,] Probabilities { get; set; }
 
         public EMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps)
         {
             AmountOfClusters = amountOfClusters;
+            AmountOfElements = values.Count;
             Distribution = distribution;
             DataSetValues = values;
             Labels = new int[values.Count];
             Eps = eps;
+            Probabilities = new double[AmountOfElements, AmountOfClusters];
         }
 
         public void SplitOnClusters()
         {
-            FillHiddenVectorByRandomValues();
-            double oldParameterM = HiddenVector.First().MStruct;
-            double oldParameterG = HiddenVector.First().GStruct;
+            FillProbabilityMatrixByRandomValues();
+            var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
             do
             {
-                EStep();
+                Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
                 MStep();
-            } while (Math.Abs(oldParameterM - HiddenVector.First().MStruct) < Eps && Math.Abs(oldParameterG - HiddenVector.First().GStruct) < Eps);
+                EStep();
+            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) < Eps);
+            SetUpLabels();
         }
 
-        private void FillHiddenVectorByRandomValues()
+        private void FillProbabilityMatrixByRandomValues()
         {
             var random = new Random();
-            HiddenVector = new List<Parameters>();
-            for (int i = 0; i < AmountOfClusters; i++)
+            //we need to check that sum of probabilities less than 1 and fix this if it is not
+            for (int i = 0; i < AmountOfElements; i++)
             {
-                //TODO what interval should be?
-                var m = random.Next(5) + 0.1 * random.Next(10);
-                var g = random.Next(5) + 0.1 * random.Next(10);
-                HiddenVector.Add(new Parameters(m, g));
+                double sum = 0;
+                for (int j = 0; j < AmountOfClusters; j++)
+                {
+                    Probabilities[i, j] = random.NextDouble();
+                    sum += Probabilities[i, j];
+                }
+                if (sum > 1)
+                {
+                    for (int j = 0; j < AmountOfClusters; j++)
+                        Probabilities[i, j] = Probabilities[i, j] / sum;
+                }
+                else if(sum<1)
+                {
+                    i--;
+                }
             }
         }
 
         private void EStep()
         {
             Probabilities = CountProbabilitiesForEachPoint();
-            SetUpLabels();
+            //SetUpLabels();
         }
 
         protected virtual void MStep()
         {
             var averages = CountAverage();
             var dispersions = CountDispersion(averages);
-            UpdateParameters(averages, dispersions);
+            var probabilitiesToBeInCluster = CountProbabilitiesToBeInCluster();
+            UpdateParameters(averages, dispersions, probabilitiesToBeInCluster);
         }
 
         private double[,] CountProbabilitiesForEachPoint()
         {
-            var probabilities = new double[AmountOfClusters, DataSetValues.Count];
-            for (int i = 0; i < DataSetValues.Count; i++)
+            var probabilities = new double[AmountOfElements, AmountOfClusters];
+            for (int i = 0; i < AmountOfElements; i++)
             {
+                double sum = 0;
                 for (int j = 0; j < AmountOfClusters; j++)
                 {
-                    probabilities[j, i] = Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
-                        HiddenVector[j].GStruct, DataSetValues[i]);
+                    sum += HiddenVector[j].СStruct * Distribution.CountProbabilityFunctionResult(
+                               HiddenVector[j].MStruct,
+                               HiddenVector[j].GStruct, DataSetValues[i]);
+                }
+                for (int j = 0; j < AmountOfClusters; j++)
+                {
+                    probabilities[i, j] = HiddenVector[j].СStruct * Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
+                        HiddenVector[j].GStruct, DataSetValues[i]) / sum;
                 }
             }
             return probabilities;
@@ -96,9 +121,9 @@ namespace Diploma.Algorithms.EM
             for (int i = 0; i < AmountOfClusters; i++)
             {
                 double sumUp = 0;
-                for (int j = 0; j < DataSetValues.Count; j++)
+                for (int j = 0; j < AmountOfElements; j++)
                 {
-                    sumUp += Probabilities[i, j] * DataSetValues[j];
+                    sumUp += Probabilities[j, i] * DataSetValues[j];
                 }
 
                 averages[i] = sumUp / CountSumOfProbabilitiesInCluster(i);
@@ -112,9 +137,9 @@ namespace Diploma.Algorithms.EM
             for (int i = 0; i < AmountOfClusters; i++)
             {
                 double sum = 0;
-                for (int j = 0; j < DataSetValues.Count; j++)
+                for (int j = 0; j < AmountOfElements; j++)
                 {
-                    sum += Probabilities[i, j] * Math.Pow(DataSetValues[j] - averages[i], 2);
+                    sum += Probabilities[j, i] * Math.Pow(DataSetValues[j] - averages[i], 2);
                 }
 
                 dispersions[i] = sum / CountSumOfProbabilitiesInCluster(i);
@@ -126,25 +151,36 @@ namespace Diploma.Algorithms.EM
         private double CountSumOfProbabilitiesInCluster(int index)
         {
             double sum = 0;
-            for (int j = 0; j < DataSetValues.Count; j++)
+            for (int j = 0; j < AmountOfElements; j++)
             {
-                sum += Probabilities[index, j];
+                sum += Probabilities[j, index];
             }
 
             return sum;
         }
 
+        private double[] CountProbabilitiesToBeInCluster()
+        {
+            var cValues = new double[AmountOfClusters];
+            for (int i = 0; i < AmountOfClusters; i++)
+            {
+                cValues[i] = CountSumOfProbabilitiesInCluster(i) / AmountOfElements;
+            }
+
+            return cValues;
+        }
+
         private void SetUpLabels()
         {
-            for (int i = 0; i < DataSetValues.Count; i++)
+            for (int i = 0; i < AmountOfElements; i++)
             {
                 int cluster = -1;
                 double maxProbability = -1;
                 for (int j = 0; j < AmountOfClusters; j++)
                 {
-                    if (maxProbability < Probabilities[j, i])
+                    if (maxProbability < Probabilities[i, j])
                     {
-                        maxProbability = Probabilities[j, i];
+                        maxProbability = Probabilities[i, j];
                         cluster = j;
                     }
                 }
@@ -153,13 +189,28 @@ namespace Diploma.Algorithms.EM
             }
         }
 
-        private void UpdateParameters(double[] averages, double[] dispersions)
+        private void UpdateParameters(double[] averages, double[] dispersions, double[] probabilitiesToBeInCluster)
         {
             HiddenVector = new List<Parameters>();
             for (int i = 0; i < AmountOfClusters; i++)
             {
-                HiddenVector.Add(new Parameters(averages[i], dispersions[i]));
+                HiddenVector.Add(new Parameters(averages[i], dispersions[i], probabilitiesToBeInCluster[i]));
             }
+        }
+
+        private double CountChangesInProbabilitiesMatrix(double[,] oldProbabilities)
+        {
+            double difference = 0;
+            for (int i = 0; i < AmountOfElements; i++)
+            {
+                for (int j = 0; j < AmountOfClusters; j++)
+                {
+                    var dif = Math.Abs(oldProbabilities[i, j] - Probabilities[i, j]);
+                    if (dif > difference)
+                        difference = dif;
+                }
+            }
+            return difference;
         }
     }
 }
