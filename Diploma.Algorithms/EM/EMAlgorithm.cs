@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Diploma.Algorithms.Distribution;
 
 namespace Diploma.Algorithms.EM
@@ -17,19 +13,6 @@ namespace Diploma.Algorithms.EM
         public readonly double Eps;
         public int[] Labels { get; protected set; }
         protected double[,] Probabilities { get; set; }
-        protected struct Parameters
-        {
-            public double MStruct;
-            public double GStruct;
-            public double СStruct;
-
-            public Parameters(double m, double g, double c)
-            {
-                MStruct = m;
-                GStruct = g;
-                СStruct = c;
-            }
-        }
         protected List<Parameters> HiddenVector { get; set; }
 
         public EMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps)
@@ -43,7 +26,7 @@ namespace Diploma.Algorithms.EM
             Probabilities = new double[AmountOfElements, AmountOfClusters];
         }
 
-        public void SplitOnClusters()
+        public virtual void SplitOnClusters()
         {
             FillProbabilityMatrixByRandomValues();
             var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
@@ -56,7 +39,7 @@ namespace Diploma.Algorithms.EM
             SetUpLabels();
         }
 
-        private void FillProbabilityMatrixByRandomValues()
+        protected void FillProbabilityMatrixByRandomValues()
         {
             var random = new Random();
             //we need to check that sum of probabilities less than 1 and fix this if it is not
