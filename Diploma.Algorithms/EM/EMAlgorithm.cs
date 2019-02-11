@@ -63,7 +63,7 @@ namespace Diploma.Algorithms.EM
             }
         }
 
-        private void EStep()
+        protected virtual void EStep()
         {
             Probabilities = CountProbabilitiesForEachPoint();
             //SetUpLabels();
@@ -98,7 +98,7 @@ namespace Diploma.Algorithms.EM
             return probabilities;
         }
 
-        private double[] CountAverage()
+        protected virtual double[] CountAverage()
         {
             var averages = new double[AmountOfClusters];
             for (int i = 0; i < AmountOfClusters; i++)
@@ -114,7 +114,7 @@ namespace Diploma.Algorithms.EM
             return averages;
         }
 
-        private double[] CountDispersion(double[] averages)
+        protected virtual double[] CountDispersion(double[] averages)
         {
             var dispersions = new double[AmountOfClusters];
             for (int i = 0; i < AmountOfClusters; i++)
@@ -131,7 +131,7 @@ namespace Diploma.Algorithms.EM
             return dispersions;
         }
 
-        private double CountSumOfProbabilitiesInCluster(int index)
+        protected virtual double CountSumOfProbabilitiesInCluster(int index)
         {
             double sum = 0;
             for (int j = 0; j < AmountOfElements; j++)
@@ -142,7 +142,7 @@ namespace Diploma.Algorithms.EM
             return sum;
         }
 
-        private double[] CountProbabilitiesToBeInCluster()
+        protected virtual double[] CountProbabilitiesToBeInCluster()
         {
             var cValues = new double[AmountOfClusters];
             for (int i = 0; i < AmountOfClusters; i++)
@@ -153,7 +153,7 @@ namespace Diploma.Algorithms.EM
             return cValues;
         }
 
-        private void SetUpLabels()
+        protected virtual void SetUpLabels()
         {
             for (int i = 0; i < AmountOfElements; i++)
             {
@@ -181,7 +181,7 @@ namespace Diploma.Algorithms.EM
             }
         }
 
-        private double CountChangesInProbabilitiesMatrix(double[,] oldProbabilities)
+        protected double CountChangesInProbabilitiesMatrix(double[,] oldProbabilities)
         {
             double difference = 0;
             for (int i = 0; i < AmountOfElements; i++)

@@ -35,7 +35,8 @@ namespace Diploma.Presentation
             {
                 data.Add(p.MemoryResult.SemanticMemoryTest.Result);
             }
-            var algor = new EMAlgorithm(4, new NormalDistribution(), data, 0.0001);
+            //var algor = new EMAlgorithm(4, new NormalDistribution(), data, 0.0001);
+            var algor = new SEMAlgorithm(4, new NormalDistribution(), data, 0.0001);
             algor.SplitOnClusters();
             using (StreamWriter sw = new StreamWriter("answer.txt"))
             {
