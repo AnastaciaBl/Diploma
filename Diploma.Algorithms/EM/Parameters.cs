@@ -2,9 +2,9 @@
 {
     public struct Parameters
     {
-        public double MStruct;
-        public double GStruct;
-        public double СStruct;
+        public double MStruct; //average
+        public double GStruct; //dispersion
+        public double СStruct; //probability
 
         public Parameters(double m, double g, double c)
         {
