@@ -13,7 +13,7 @@ namespace Diploma.Algorithms.EM
         public readonly double Eps;
         public int[] Labels { get; protected set; }
         protected double[,] Probabilities { get; set; }
-        protected List<Parameters> HiddenVector { get; set; }
+        public List<Parameters> HiddenVector { get; protected set; }
 
         public EMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps)
         {
@@ -28,20 +28,20 @@ namespace Diploma.Algorithms.EM
 
         public virtual void SplitOnClusters()
         {
-            FillProbabilityMatrixByRandomValues();
+            Random random = new Random();
+            FillProbabilityMatrixByRandomValues(random);
             var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
             do
             {
                 Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
                 MStep();
                 EStep();
-            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) < Eps);
+            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps);
             SetUpLabels();
         }
 
-        protected void FillProbabilityMatrixByRandomValues()
+        protected void FillProbabilityMatrixByRandomValues(Random random)
         {
-            var random = new Random();
             //we need to check that sum of probabilities less than 1 and fix this if it is not
             for (int i = 0; i < AmountOfElements; i++)
             {
@@ -56,7 +56,7 @@ namespace Diploma.Algorithms.EM
                     for (int j = 0; j < AmountOfClusters; j++)
                         Probabilities[i, j] = Probabilities[i, j] / sum;
                 }
-                else if(sum<1)
+                else if(sum < 1)
                 {
                     i--;
                 }

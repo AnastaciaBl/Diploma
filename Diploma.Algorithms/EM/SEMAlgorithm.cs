@@ -20,26 +20,56 @@ namespace Diploma.Algorithms.EM
 
         public override void SplitOnClusters()
         {
-            FillProbabilityMatrixByRandomValues();
+            Random random = new Random();
+            FillProbabilityMatrixByRandomValues(random);
             var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
             do
             {
                 Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
-                SStep();
+                SStep(random);
                 MStep();
                 EStep();
-            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) < Eps);
+            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps);
 
             SetUpLabels();
         }
 
-        private void UpdateProbabilityMatrix()
+        private void UpdateProbabilityMatrix(Random random)
         {
+            for (int i = 0; i < AmountOfElements; i++)
+            {
+                var newProbabilities = new List<double>();
+                double checkSum = 0;
+                for (int j = 0; j < AmountOfClusters; j++)
+                {
+                    var prob = random.NextDouble();
+                    int index = 0;
+                    double sum = Probabilities[i, index];
+                    while (prob > sum)
+                    {
+                        index++;
+                        sum += Probabilities[i, index];
+                    }
+                    newProbabilities.Add(Probabilities[i, index]);
+                    checkSum += Probabilities[i, index];
+                    //we need to check that sum of probabilities less than 1 and fix this if it is not
+                    //TODO the same logic in 
+                }
 
+                if (checkSum > 1)
+                {
+                    newProbabilities.ForEach(p => p = p / checkSum);
+                }
+                else if (checkSum < 1)
+                {
+                    i--;
+                }
+            }
         }
 
-        private void SStep()
+        private void SStep(Random random)
         {
+            UpdateProbabilityMatrix(random);
             SetUpLabels();
         }
 
@@ -86,7 +116,8 @@ namespace Diploma.Algorithms.EM
             for (int i = 0; i < AmountOfClusters; i++)
             {
                 double sum = 0;
-                TempClusters[i].Select(e => sum += Math.Pow(e - averages[i], 2));
+                TempClusters[i].ToList()
+                    .ForEach(e => sum += Math.Pow(e - averages[i], 2));
                 dispersions[i] = sum / TempClusters[i].Length;
             }
             return dispersions;
@@ -96,7 +127,7 @@ namespace Diploma.Algorithms.EM
         {
             var probabilities = new double[AmountOfClusters];
             for (int i = 0; i < AmountOfClusters; i++)
-                probabilities[i] = TempClusters[i].Length / AmountOfElements;
+                probabilities[i] = 1.0 * TempClusters[i].Length / AmountOfElements;
             return probabilities;
         }
     }
