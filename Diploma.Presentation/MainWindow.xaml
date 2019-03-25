@@ -5,10 +5,28 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Diploma.Presentation"
         xmlns:DV="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
-        xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+        xmlns:charts="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <!--<DVC:BubbleDataPoint></DVC:BubbleDataPoint>-->
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <charts:Chart Grid.Column="0" Grid.Row="0" Name="dataChart">
+            <charts:Chart.Series>
+                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points}"/>
+            </charts:Chart.Series>
+        </charts:Chart>
+        <charts:Chart Grid.Column="1" Grid.Row="0" Name="dataAfterEMChart">
+            <charts:Chart.Series>
+                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points1}"/>
+                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points2}"/>
+                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
+            </charts:Chart.Series>
+        </charts:Chart>
     </Grid>
 </Window>

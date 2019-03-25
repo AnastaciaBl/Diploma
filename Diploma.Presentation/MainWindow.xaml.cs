@@ -17,6 +17,7 @@ using Diploma.Model;
 using Diploma.Algorithms.EM;
 using Diploma.Algorithms.Distribution;
 using System.IO;
+using System.Windows.Controls.DataVisualization.Charting;
 
 namespace Diploma.Presentation
 {
@@ -31,19 +32,55 @@ namespace Diploma.Presentation
             var reader = new PatientReader();
             var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
             var data = new List<double>();
-            foreach (var p in patients)
-            {
-                data.Add(p.MemoryResult.SemanticMemoryTest.Result);
-            }
+            //foreach (var p in patients)
+            //{
+            //    data.Add(p.MemoryResult.SemanticMemoryTest.Result);
+            //}
             //var algor = new EMAlgorithm(4, new NormalDistribution(), data, 0.0001);
-            var algor = new SEMAlgorithm(4, new NormalDistribution(), data, 0.0001);
-            algor.SplitOnClusters();
-            using (StreamWriter sw = new StreamWriter("answer.txt"))
+
+            //using (StreamWriter sw = new StreamWriter("answer.txt"))
+            //{
+            //    for(int i=0;i<data.Count;i++)
+            //        sw.WriteLine(data[i] + "    " + algor.Labels[i]);
+            //}
+
+            using (StreamReader sw = new StreamReader("data2.txt"))
             {
-                for(int i=0;i<data.Count;i++)
-                    sw.WriteLine(data[i] + "    " + algor.Labels[i]);
+                while (!sw.EndOfStream)
+                {
+                    data.Add(Convert.ToDouble(sw.ReadLine()));
+                }
             }
-            int a = 0;
+
+            var fChart = new PointCollection();
+            var sChart1 = new PointCollection();
+            var sChart2 = new PointCollection();
+            var sChart3 = new PointCollection();
+
+            var algor = new EMAlgorithm(3, new NormalDistribution(), data, 0.00001);
+            algor.SplitOnClusters();
+
+            for (int i = 0; i < data.Count; i++)
+            {
+                fChart.Add(new Point(i, data[i]));
+                if(algor.Labels[i] == 0)
+                    sChart1.Add(new Point(i, data[i]));
+                else if (algor.Labels[i] == 1)
+                    sChart2.Add(new Point(i, data[i]));
+                else sChart3.Add(new Point(i, data[i]));
+            }
+
+            //((LineSeries)dataChart.Series[0]).ItemsSource = fChart;
+            dataChart.DataContext = new {points = fChart};
+            dataAfterEMChart.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
+        }
+
+        public void FillData(ref PointCollection array, List<double> data)
+        {
+            for (int i = 0; i < data.Count; i++)
+            {
+                array.Add(new Point(i, data[i]));
+            }
         }
     }
 }
