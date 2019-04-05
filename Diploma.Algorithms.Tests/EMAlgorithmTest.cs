@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Diploma.Algorithms.Distribution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MathNet.Numerics;
@@ -29,16 +30,41 @@ namespace Diploma.Algorithms.Tests
             //Arrange
             AmountOfElements = 1000;
             AmountOfClusters = 3;
-            EtalonHiddenVector.Add(new Parameters(-5, 0.2, 0.1));
-            EtalonHiddenVector.Add(new Parameters(5, 0.2, 0.1));
-            EtalonHiddenVector.Add(new Parameters(0, 0.1, 0.8));
-            var sample = GenerateSample();
-            
+            EtalonHiddenVector.Add(new Parameters(-5, 3, 0.2));
+            EtalonHiddenVector.Add(new Parameters(5, 3, 0.2));
+            EtalonHiddenVector.Add(new Parameters(0, 3, 0.6));
+            //var sample = GenerateSample();
+
+            List<double> sample = new List<double>();
+
+            using (var sw = new StreamReader("data.txt"))
+            {
+                while (!sw.EndOfStream)
+                {
+                    sample.Add(Convert.ToDouble(sw.ReadLine()));
+                }
+            }
+
+            /*var sample = new List<double>();
+            sample.Add(-4.9);
+            sample.Add(-5);
+            sample.Add(-5.1);
+            sample.Add(-0.1);
+            sample.Add(0);
+            sample.Add(0.1);
+            sample.Add(4.9);
+            sample.Add(5);
+            sample.Add(5.1);*/
+
             //Act
             var emAlgorithm = new EMAlgorithm(AmountOfClusters, new NormalDistribution(), sample, Eps);
             emAlgorithm.SplitOnClusters();
 
+            //var semAlgorithm = new SEMAlgorithm(AmountOfClusters, new NormalDistribution(), sample, Eps);
+            //semAlgorithm.SplitOnClusters();
+
             //Assert
+            //TODO finish the test
             Assert.IsTrue(false);
         }
 
@@ -54,6 +80,15 @@ namespace Diploma.Algorithms.Tests
                     sample.Add(random.Sample());
                 }
             }
+
+            using (var sw = new StreamWriter("data(3, 0.2-0.2-6).txt"))
+            {
+                foreach (var n in sample)
+                {
+                    sw.WriteLine(n);
+                }
+            }
+
             return sample;
         }
     }

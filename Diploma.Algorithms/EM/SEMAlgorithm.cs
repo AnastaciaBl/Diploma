@@ -55,15 +55,8 @@ namespace Diploma.Algorithms.EM
                     //we need to check that sum of probabilities less than 1 and fix this if it is not
                     //TODO the same logic in 
                 }
-
-                if (checkSum > 1)
-                {
-                    newProbabilities.ForEach(p => p = p / checkSum);
-                }
-                else if (checkSum < 1)
-                {
-                    i--;
-                }
+                //TODO check this
+                newProbabilities.ForEach(p => p = p / checkSum);
             }
         }
 

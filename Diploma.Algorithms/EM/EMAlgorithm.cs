@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Diploma.Algorithms.Distribution;
 
 namespace Diploma.Algorithms.EM
@@ -14,6 +15,8 @@ namespace Diploma.Algorithms.EM
         public int[] Labels { get; protected set; }
         protected double[,] Probabilities { get; set; }
         public List<Parameters> HiddenVector { get; protected set; }
+        private string FileName = "test1_seed_2_matrix.txt";
+        private string FileNameParameters = "test1_seed_2_parameters.txt";
 
         public EMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps)
         {
@@ -28,14 +31,16 @@ namespace Diploma.Algorithms.EM
 
         public virtual void SplitOnClusters()
         {
-            Random random = new Random();
+            Random random = new Random(2);
             FillProbabilityMatrixByRandomValues(random);
             var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
             do
             {
                 Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
+                PrintProbabilities(FileName);
                 MStep();
                 EStep();
+                PrintParameters(FileNameParameters);
             } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps);
             SetUpLabels();
         }
@@ -51,15 +56,8 @@ namespace Diploma.Algorithms.EM
                     Probabilities[i, j] = random.NextDouble();
                     sum += Probabilities[i, j];
                 }
-                if (sum > 1)
-                {
-                    for (int j = 0; j < AmountOfClusters; j++)
-                        Probabilities[i, j] = Probabilities[i, j] / sum;
-                }
-                else if(sum < 1)
-                {
-                    i--;
-                }
+                for (int j = 0; j < AmountOfClusters; j++)
+                    Probabilities[i, j] = Probabilities[i, j] / sum;
             }
         }
 
@@ -77,6 +75,7 @@ namespace Diploma.Algorithms.EM
             UpdateParameters(averages, dispersions, probabilitiesToBeInCluster);
         }
 
+        //TODO some problems with dispersion
         private double[,] CountProbabilitiesForEachPoint()
         {
             var probabilities = new double[AmountOfElements, AmountOfClusters];
@@ -92,10 +91,10 @@ namespace Diploma.Algorithms.EM
                 for (int j = 0; j < AmountOfClusters; j++)
                 {
                     probabilities[i, j] = HiddenVector[j].СStruct * Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
-                        HiddenVector[j].GStruct, DataSetValues[i]) / sum;
+                                              HiddenVector[j].GStruct, DataSetValues[i]) / sum;
                 }
             }
-            return probabilities;
+                return probabilities;
         }
 
         protected virtual double[] CountAverage()
@@ -155,6 +154,7 @@ namespace Diploma.Algorithms.EM
 
         protected virtual void SetUpLabels()
         {
+            int z = 0, f = 0, s = 0;
             for (int i = 0; i < AmountOfElements; i++)
             {
                 int cluster = -1;
@@ -169,6 +169,11 @@ namespace Diploma.Algorithms.EM
                 }
 
                 Labels[i] = cluster;
+                if (cluster == 0)
+                    z++;
+                else if (cluster == 1)
+                    f++;
+                else s++;
             }
         }
 
@@ -194,6 +199,36 @@ namespace Diploma.Algorithms.EM
                 }
             }
             return difference;
+        }
+
+        private void PrintProbabilities(string fileName)
+        {
+            using (var sw = new StreamWriter(fileName, true))
+            {
+                for (int i = 0; i < AmountOfElements; i++)
+                {
+                    string sr = string.Empty;
+                    for (int j = 0; j < AmountOfClusters; j++)
+                        sr += Probabilities[i, j] + "\t";
+                    sw.WriteLine(sr);
+                }
+                sw.WriteLine("**************************************************************************************************");
+            }
+        }
+
+        private void PrintParameters(string fileName)
+        {
+            using (var sw = new StreamWriter(fileName, true))
+            {
+                for (int i = 0; i < AmountOfClusters; i++)
+                {
+                    string sr = string.Empty;
+                    sr = "M: " + HiddenVector[i].MStruct + "\tG: " + HiddenVector[i].GStruct + "\tC: " +
+                         HiddenVector[i].СStruct;
+                    sw.WriteLine(sr);
+                }
+                sw.WriteLine("**************************************************************************************************");
+            }
         }
     }
 }
