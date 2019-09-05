@@ -30,20 +30,20 @@ namespace Diploma.Algorithms.Tests
             //Arrange
             AmountOfElements = 1000;
             AmountOfClusters = 3;
-            EtalonHiddenVector.Add(new Parameters(-5, 3, 0.2));
-            EtalonHiddenVector.Add(new Parameters(5, 3, 0.2));
-            EtalonHiddenVector.Add(new Parameters(0, 3, 0.6));
-            //var sample = GenerateSample();
+            EtalonHiddenVector.Add(new Parameters(-5, 1, 0.2));
+            EtalonHiddenVector.Add(new Parameters(5, 1, 0.2));
+            EtalonHiddenVector.Add(new Parameters(0, 1, 0.6));
+            var sample = GenerateSample();
 
-            List<double> sample = new List<double>();
+            //List<double> sample = new List<double>();
 
-            using (var sw = new StreamReader("data.txt"))
-            {
-                while (!sw.EndOfStream)
-                {
-                    sample.Add(Convert.ToDouble(sw.ReadLine()));
-                }
-            }
+            //using (var sw = new StreamReader("data.txt"))
+            //{
+            //    while (!sw.EndOfStream)
+            //    {
+            //        sample.Add(Convert.ToDouble(sw.ReadLine()));
+            //    }
+            //}
 
             /*var sample = new List<double>();
             sample.Add(-4.9);
@@ -81,7 +81,7 @@ namespace Diploma.Algorithms.Tests
                 }
             }
 
-            using (var sw = new StreamWriter("data(3, 0.2-0.2-6).txt"))
+            using (var sw = new StreamWriter("data3.txt"))
             {
                 foreach (var n in sample)
                 {

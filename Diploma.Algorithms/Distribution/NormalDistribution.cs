@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.Distributions;
+using System;
 
 namespace Diploma.Algorithms.Distribution
 {
@@ -9,10 +10,8 @@ namespace Diploma.Algorithms.Distribution
 
         public double CountProbabilityFunctionResult(double m, double g, double xValue)
         {
-            var answer = (1.0 / ((Math.Sqrt(g) * Math.Sqrt(2 * Math.PI)))) *
-                         Math.Exp(-1.0 * (Math.Pow(xValue - m, 2) / (2 * g)));
-            //var answer = (1.0 / ((g * Math.Sqrt(2 * Math.PI)))) *
-            //             Math.Exp(-1.0 * (Math.Pow(xValue - m, 2) / (2 * g * g)));
+            var norm = new Normal(m, Math.Sqrt(g));
+            var answer = norm.Density(xValue);
             return answer;
         }
     }

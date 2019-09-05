@@ -32,19 +32,8 @@ namespace Diploma.Presentation
             var reader = new PatientReader();
             var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
             var data = new List<double>();
-            //foreach (var p in patients)
-            //{
-            //    data.Add(p.MemoryResult.SemanticMemoryTest.Result);
-            //}
-            //var algor = new EMAlgorithm(4, new NormalDistribution(), data, 0.0001);
 
-            //using (StreamWriter sw = new StreamWriter("answer.txt"))
-            //{
-            //    for(int i=0;i<data.Count;i++)
-            //        sw.WriteLine(data[i] + "    " + algor.Labels[i]);
-            //}
-
-            using (StreamReader sw = new StreamReader("data2.txt"))
+            using (StreamReader sw = new StreamReader("data3.txt"))
             {
                 while (!sw.EndOfStream)
                 {
@@ -58,6 +47,7 @@ namespace Diploma.Presentation
             var sChart3 = new PointCollection();
 
             var algor = new EMAlgorithm(3, new NormalDistribution(), data, 0.00001);
+            //var algor = new SEMAlgorithm(3, new NormalDistribution(), data, 0.00001);
             algor.SplitOnClusters();
 
             for (int i = 0; i < data.Count; i++)
@@ -70,7 +60,6 @@ namespace Diploma.Presentation
                 else sChart3.Add(new Point(i, data[i]));
             }
 
-            //((LineSeries)dataChart.Series[0]).ItemsSource = fChart;
             dataChart.DataContext = new {points = fChart};
             dataAfterEMChart.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
         }

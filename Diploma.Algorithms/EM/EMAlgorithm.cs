@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Diploma.Algorithms.Distribution;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Diploma.Algorithms.Distribution;
 
 namespace Diploma.Algorithms.EM
 {
@@ -15,8 +15,6 @@ namespace Diploma.Algorithms.EM
         public int[] Labels { get; protected set; }
         protected double[,] Probabilities { get; set; }
         public List<Parameters> HiddenVector { get; protected set; }
-        private string FileName = "test1_seed_2_matrix.txt";
-        private string FileNameParameters = "test1_seed_2_parameters.txt";
 
         public EMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps)
         {
@@ -37,10 +35,8 @@ namespace Diploma.Algorithms.EM
             do
             {
                 Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
-                PrintProbabilities(FileName);
                 MStep();
                 EStep();
-                PrintParameters(FileNameParameters);
             } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps);
             SetUpLabels();
         }
@@ -64,7 +60,7 @@ namespace Diploma.Algorithms.EM
         protected virtual void EStep()
         {
             Probabilities = CountProbabilitiesForEachPoint();
-            //SetUpLabels();
+            SetUpLabels();
         }
 
         protected virtual void MStep()
@@ -90,11 +86,12 @@ namespace Diploma.Algorithms.EM
                 }
                 for (int j = 0; j < AmountOfClusters; j++)
                 {
-                    probabilities[i, j] = HiddenVector[j].СStruct * Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
-                                              HiddenVector[j].GStruct, DataSetValues[i]) / sum;
+                    var probability = HiddenVector[j].СStruct * Distribution.CountProbabilityFunctionResult(HiddenVector[j].MStruct,
+                                              HiddenVector[j].GStruct, DataSetValues[i]);
+                    probabilities[i, j] = probability / sum;
                 }
             }
-                return probabilities;
+            return probabilities;
         }
 
         protected virtual double[] CountAverage()
