@@ -23,41 +23,48 @@ namespace Diploma.Algorithms.EM
             Random random = new Random();
             FillProbabilityMatrixByRandomValues(random);
             var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
+            var index = 0;
             do
             {
                 Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
                 SStep(random);
                 MStep();
                 EStep();
-            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps);
+                index++;
+            } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 1000));
 
             SetUpLabels();
         }
 
         private void UpdateProbabilityMatrix(Random random)
         {
+            var oldProbabilities = Probabilities;
+            Probabilities = new double[AmountOfElements, AmountOfClusters];
             for (int i = 0; i < AmountOfElements; i++)
             {
-                var newProbabilities = new List<double>();
-                double checkSum = 0;
-                for (int j = 0; j < AmountOfClusters; j++)
+                var sortProbabilities = SortArrayWithProbabilities(oldProbabilities, i);
+                var prob = random.NextDouble();
+                int index = 0;
+                double sum = sortProbabilities[index].Value;
+                while (prob > sum)
                 {
-                    var prob = random.NextDouble();
-                    int index = 0;
-                    double sum = Probabilities[i, index];
-                    while (prob > sum)
-                    {
-                        index++;
-                        sum += Probabilities[i, index];
-                    }
-                    newProbabilities.Add(Probabilities[i, index]);
-                    checkSum += Probabilities[i, index];
-                    //we need to check that sum of probabilities less than 1 and fix this if it is not
-                    //TODO the same logic in 
+                    index++;
+                    sum += sortProbabilities[index].Value;
                 }
-                //TODO check this
-                newProbabilities.ForEach(p => p = p / checkSum);
+
+                Probabilities[i, sortProbabilities[index].Key] = 1;
             }
+        }
+
+        private KeyValuePair<int, double>[] SortArrayWithProbabilities(double[,] array, int index)
+        {
+            var dictionary = new Dictionary<int, double>();
+            for (var i = 0; i < AmountOfClusters; i++)
+            {
+                dictionary.Add(i, array[index, i]);
+            }
+
+            return dictionary.OrderBy(p => p.Value).ToArray();
         }
 
         private void SStep(Random random)
@@ -79,22 +86,23 @@ namespace Diploma.Algorithms.EM
         protected override void SetUpLabels()
         {
             base.SetUpLabels();
-            TempClusters = new double[AmountOfClusters][];
-            for (int i = 0; i < AmountOfClusters; i++)
-            {
-                var list = new List<double>();
-                for (int j = 0; j < AmountOfElements; j++)
-                {
-                    if (Labels[j] == i)
-                        list.Add(DataSetValues[j]);
-                }
+            //TempClusters = new double[AmountOfClusters][];
+            //for (int i = 0; i < AmountOfClusters; i++)
+            //{
+            //    var list = new List<double>();
+            //    for (int j = 0; j < AmountOfElements; j++)
+            //    {
+            //        if (Labels[j] == i)
+            //            list.Add(DataSetValues[j]);
+            //    }
 
-                TempClusters[i] = list.ToArray();
-            }
+            //    TempClusters[i] = list.ToArray();
+            //}
         }
 
         protected override double[] CountAverage()
         {
+            return base.CountAverage();
             var averages = new double[AmountOfClusters];
             for (int i = 0; i < AmountOfClusters; i++)
             {
@@ -105,6 +113,7 @@ namespace Diploma.Algorithms.EM
 
         protected override double[] CountDispersion(double[] averages)
         {
+            return base.CountDispersion(averages);
             var dispersions = new double[AmountOfClusters];
             for (int i = 0; i < AmountOfClusters; i++)
             {
@@ -118,10 +127,11 @@ namespace Diploma.Algorithms.EM
 
         protected override double[] CountProbabilitiesToBeInCluster()
         {
-            var probabilities = new double[AmountOfClusters];
-            for (int i = 0; i < AmountOfClusters; i++)
-                probabilities[i] = 1.0 * TempClusters[i].Length / AmountOfElements;
-            return probabilities;
+            return base.CountProbabilitiesToBeInCluster();
+            //var probabilities = new double[AmountOfClusters];
+            //for (int i = 0; i < AmountOfClusters; i++)
+            //    probabilities[i] = 1.0 * TempClusters[i].Length / AmountOfElements;
+            //return probabilities;
         }
     }
 }

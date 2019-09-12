@@ -46,8 +46,8 @@ namespace Diploma.Presentation
             var sChart2 = new PointCollection();
             var sChart3 = new PointCollection();
 
-            var algor = new EMAlgorithm(3, new NormalDistribution(), data, 0.00001);
-            //var algor = new SEMAlgorithm(3, new NormalDistribution(), data, 0.00001);
+            //var algor = new EMAlgorithm(3, new NormalDistribution(), data, 0.00001);
+            var algor = new SEMAlgorithm(3, new NormalDistribution(), data, 0.00001);
             algor.SplitOnClusters();
 
             for (int i = 0; i < data.Count; i++)
