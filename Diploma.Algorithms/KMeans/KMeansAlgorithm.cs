@@ -17,6 +17,12 @@ namespace Diploma.Algorithms.Kmeans
                 DataSet[i] = new [] {data[i], 0};
         }
 
+        public KMeansAlgorithm(int amountOfClusters, double[][] data)
+        {
+            AmountOfClusters = amountOfClusters;
+            DataSet = data;
+        }
+
         public void SplitOnClusters()
         {
             var kMeans = new KMeans(AmountOfClusters);

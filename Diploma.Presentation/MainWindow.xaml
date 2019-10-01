@@ -7,26 +7,65 @@
         xmlns:DV="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:charts="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="493" Width="807">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <charts:Chart Grid.Column="0" Grid.Row="0" Name="dataChart">
-            <charts:Chart.Series>
-                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points}"/>
-            </charts:Chart.Series>
-        </charts:Chart>
-        <charts:Chart Grid.Column="1" Grid.Row="0" Name="dataAfterEMChart">
-            <charts:Chart.Series>
-                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points1}"/>
-                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points2}"/>
-                <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
-            </charts:Chart.Series>
-        </charts:Chart>
+
+        <Menu Grid.Row="0" Grid.Column ="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <MenuItem Header="File..."/>
+        </Menu>
+
+        <Grid Grid.Row="1" Grid.Column ="0" Name="TabGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TabControl Grid.Row="0" Grid.Column ="0">
+                <TabItem Header="TabItem">
+                    <Grid Background="#FFE5E5E5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <DataGrid HorizontalAlignment="Left" Height="385" Margin="10,10,0,0" VerticalAlignment="Top" Width="400"/>
+                        <TextBox HorizontalAlignment="Left" Height="23" Margin="526,52,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
+                        <Button Content="Розділити" HorizontalAlignment="Left" Margin="495,100,0,0" VerticalAlignment="Top" Width="75"/>
+                        <Label Content="К-ть кластерів:" HorizontalAlignment="Left" Margin="431,49,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.421,-0.423"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="TabItem" VerticalAlignment="Top">
+                    <Grid Background="#FFE5E5E5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <charts:Chart x:Name="dataAfterEMChart" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" >
+                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points1}"/>
+                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points2}"/>
+                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
+                            <charts:Chart.Axes>
+                                <charts:LinearAxis Orientation="Y" Minimum="-1" Maximum="1" Interval="1" />
+                                
+                            </charts:Chart.Axes>
+                        </charts:Chart>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
     </Grid>
 </Window>
