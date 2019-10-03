@@ -3,8 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Diploma.Presentation"
-        xmlns:DV="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:charts="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="493" Width="807">
@@ -36,13 +34,18 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="0.5*"/>
+                            <ColumnDefinition Width="0.5*"/>
                         </Grid.ColumnDefinitions>
 
-                        <DataGrid HorizontalAlignment="Left" Height="385" Margin="10,10,0,0" VerticalAlignment="Top" Width="400"/>
-                        <TextBox HorizontalAlignment="Left" Height="23" Margin="526,52,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-                        <Button Content="Розділити" HorizontalAlignment="Left" Margin="495,100,0,0" VerticalAlignment="Top" Width="75"/>
-                        <Label Content="К-ть кластерів:" HorizontalAlignment="Left" Margin="431,49,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.421,-0.423"/>
+                        <DataGrid Name="PatientsDataGrid" Grid.Column="0" Margin="5,5,5,5" AutoGenerateColumns="True" ItemsSource="{Binding patients}"/>
+                        <charts:Chart x:Name="AllDataChart" Grid.Column="1" Margin="5,5,5,5">
+                            <charts:ScatterSeries Title="" IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points}"/>
+                            <charts:Chart.Axes>
+                                <charts:LinearAxis Orientation="X" Minimum="0"/>
+                                <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
+                            </charts:Chart.Axes>
+                        </charts:Chart>
                     </Grid>
                 </TabItem>
                 <TabItem Header="One dimension" VerticalAlignment="Top">

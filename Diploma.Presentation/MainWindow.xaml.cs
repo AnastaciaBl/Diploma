@@ -17,6 +17,7 @@ using Diploma.Model;
 using Diploma.Algorithms.EM;
 using Diploma.Algorithms.Distribution;
 using System.IO;
+using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using Diploma.Algorithms.Kmeans;
 using Diploma.Algorithms.PCA;
@@ -28,11 +29,15 @@ namespace Diploma.Presentation
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             InitializeComponent();
+
             var reader = new PatientReader();
             var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
+            SetDataToDataGrid(patients);
+
             //var data = new List<double>();
 
             //using (StreamReader sw = new StreamReader("data3.txt"))
@@ -170,6 +175,11 @@ namespace Diploma.Presentation
             {
                 array.Add(new Point(i, data[i]));
             }
+        }
+
+        public void SetDataToDataGrid(List<Patient> patients)
+        {
+            PatientsDataGrid.ItemsSource = patients;
         }
     }
 }
