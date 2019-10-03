@@ -33,44 +33,135 @@ namespace Diploma.Presentation
             InitializeComponent();
             var reader = new PatientReader();
             var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
-            var data = new List<double>();
+            //var data = new List<double>();
 
-            using (StreamReader sw = new StreamReader("data3.txt"))
+            //using (StreamReader sw = new StreamReader("data3.txt"))
+            //{
+            //    while (!sw.EndOfStream)
+            //    {
+            //        data.Add(Convert.ToDouble(sw.ReadLine()));
+            //    }
+            //}
+
+            var patData1 = new List<double>();
+            var patData2 = new List<double>();
+            var patData3 = new List<double>();
+            foreach (var p in patients)
             {
-                while (!sw.EndOfStream)
-                {
-                    data.Add(Convert.ToDouble(sw.ReadLine()));
-                }
+                //patData.Add(p.IntellectionResult.AnalogiesTest.Result);
+                patData1.Add(p.EmotionalIntelligenceResult.PATest.Result);
+                patData2.Add(p.EmotionalIntelligenceResult.UATest.Result);
+                patData3.Add(p.EmotionalIntelligenceResult.VAETest.Result);
             }
 
-            var fChart = new PointCollection();
+            //var array = CreateDataSet(patData1, patData2);
+            var array = CreateDataSet(patData1, patData2, patData3);
+
+            //var algor = new EMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
+            //var algor = new SEMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
+            var algor = new KMeansAlgorithm(3, array);
+            algor.SplitOnClusters();
+
+            //var algor2 = new PCA(data);
+            //var res = algor2.MakeComponents();
+
+            //var algor = new KMeansAlgorithm(3, res);
+            //algor.SplitOnClusters();
+
+
+
+            //TwoScatter(patData1, patData2, algor.Labels);
+            //ScatterChart(patData, algor.Labels);
+            LineChart(patData1, patData2, patData3, algor.Labels);
+        }
+
+        public void ScatterChart(List<double> data, int[] labels)
+        {
             var sChart1 = new PointCollection();
             var sChart2 = new PointCollection();
             var sChart3 = new PointCollection();
 
-            //var algor = new EMAlgorithm(3, new NormalDistribution(), data, 0.00001);
-            //var algor = new SEMAlgorithm(3, new NormalDistribution(), data, 0.00001);
-            //var algor = new KMeansAlgorithm(3, data);
-            //algor.SplitOnClusters();
-
-            var algor2 = new PCA(data);
-            var res = algor2.MakeComponents();
-
-            var algor = new KMeansAlgorithm(3, res);
-            algor.SplitOnClusters();
-
             for (int i = 0; i < data.Count; i++)
             {
-                fChart.Add(new Point(data[i], 0));
-                if(algor.Labels[i] == 0)
+                if (labels[i] == 0)
                     sChart1.Add(new Point(data[i], 0));
-                else if (algor.Labels[i] == 1)
+                else if (labels[i] == 1)
                     sChart2.Add(new Point(data[i], 0));
                 else sChart3.Add(new Point(data[i], 0));
             }
 
-            //dataChart.DataContext = new {points = fChart};
-            dataAfterEMChart.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
+            dataAfterEMChart.DataContext = new { points1 = sChart1, points2 = sChart2, points3 = sChart3 };
+        }
+
+        public void LineChart(List<double> x1, List<double> x2, List<double> x3, int[] labels)
+        {
+            var sChart1 = new PointCollection();
+            var sChart2 = new PointCollection();
+            var sChart3 = new PointCollection();
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                if (labels[i] == 0)
+                {
+                    sChart1.Add(new Point(x1[i], 1));
+                    sChart1.Add(new Point(x2[i], 1));
+                    sChart1.Add(new Point(x3[i], 1));
+                }
+                else if (labels[i] == 1)
+                {
+                    sChart2.Add(new Point(x1[i], 2));
+                    sChart2.Add(new Point(x2[i], 2));
+                    sChart2.Add(new Point(x3[i], 2));
+                }
+                else
+                {
+                    sChart3.Add(new Point(x1[i], 3));
+                    sChart3.Add(new Point(x2[i], 3));
+                    sChart3.Add(new Point(x3[i], 3));
+                }
+            }
+
+            DataLines.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
+        }
+
+        public void TwoScatter(List<double> x, List<double> y, int[] labels)
+        {
+            var sChart1 = new PointCollection();
+            var sChart2 = new PointCollection();
+            var sChart3 = new PointCollection();
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                if (labels[i] == 0)
+                    sChart1.Add(new Point(x[i], y[i]));
+                else if (labels[i] == 1)
+                    sChart2.Add(new Point(x[i], y[i]));
+                else sChart3.Add(new Point(x[i], y[i]));
+            }
+
+            TwoScatterChart.DataContext = new { points1 = sChart1, points2 = sChart2, points3 = sChart3 };
+        }
+
+        public double[][] CreateDataSet(List<double> x, List<double> y)
+        {
+            var array = new double[x.Count][];
+            for (var i = 0; i < x.Count; i++)
+            {
+                array[i] = new [] { x[i], y[i] };
+            }
+
+            return array;
+        }
+
+        public double[][] CreateDataSet(List<double> x, List<double> x2, List<double> x3)
+        {
+            var array = new double[x.Count][];
+            for (var i = 0; i < x.Count; i++)
+            {
+                array[i] = new[] { x[i], x2[i], x3[i] };
+            }
+
+            return array;
         }
 
         public void FillData(ref PointCollection array, List<double> data)

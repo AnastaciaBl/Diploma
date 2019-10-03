@@ -32,12 +32,14 @@ namespace Diploma.Algorithms.EM
             Random random = new Random(2);
             FillProbabilityMatrixByRandomValues(random);
             var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
+            var index = 0;
             do
             {
                 Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
                 MStep();
                 EStep();
-            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps);
+                index++;
+            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps && (index < 25));
             SetUpLabels();
         }
 

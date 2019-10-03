@@ -31,7 +31,7 @@ namespace Diploma.Algorithms.EM
                 MStep();
                 EStep();
                 index++;
-            } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 1000));
+            } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 50));
 
             SetUpLabels();
         }
