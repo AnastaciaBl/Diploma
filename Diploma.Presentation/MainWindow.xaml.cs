@@ -1,26 +1,16 @@
 ﻿using System;
+using Diploma.Algorithms.Kmeans;
+using Diploma.Data;
+using Diploma.Presentation.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Diploma.Data;
-using Diploma.Model;
-using Diploma.Algorithms.EM;
-using Diploma.Algorithms.Distribution;
-using System.IO;
 using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
-using Diploma.Algorithms.Kmeans;
-using Diploma.Algorithms.PCA;
+using System.Windows.Media;
+using System.Windows.Shapes;
+using Diploma.Algorithms.Distribution;
+using Diploma.Algorithms.EM;
 
 namespace Diploma.Presentation
 {
@@ -29,6 +19,9 @@ namespace Diploma.Presentation
     /// </summary>
     public partial class MainWindow : Window
     {
+        private int AmountOfPatients { get; }
+        private List<PatientViewModel> Patients { get; }
+        private double[,] AttributeMatrix { get; }
 
         public MainWindow()
         {
@@ -36,48 +29,17 @@ namespace Diploma.Presentation
 
             var reader = new PatientReader();
             var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
-            SetDataToDataGrid(patients);
+            AmountOfPatients = patients.Count;
+            AttributeMatrix = reader.GetAttributesMatrix(patients);
+            Patients = PatientViewModel.SetListOfPatientViewModel(patients);
+            FillDataToElements();
+            //FillAllPatientsChart();
 
-            //var data = new List<double>();
-
-            //using (StreamReader sw = new StreamReader("data3.txt"))
-            //{
-            //    while (!sw.EndOfStream)
-            //    {
-            //        data.Add(Convert.ToDouble(sw.ReadLine()));
-            //    }
-            //}
-
-            var patData1 = new List<double>();
-            var patData2 = new List<double>();
-            var patData3 = new List<double>();
-            foreach (var p in patients)
-            {
-                //patData.Add(p.IntellectionResult.AnalogiesTest.Result);
-                patData1.Add(p.EmotionalIntelligenceResult.PATest.Result);
-                patData2.Add(p.EmotionalIntelligenceResult.UATest.Result);
-                patData3.Add(p.EmotionalIntelligenceResult.VAETest.Result);
-            }
-
-            //var array = CreateDataSet(patData1, patData2);
-            var array = CreateDataSet(patData1, patData2, patData3);
-
+            
             //var algor = new EMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
             //var algor = new SEMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
-            var algor = new KMeansAlgorithm(3, array);
-            algor.SplitOnClusters();
-
-            //var algor2 = new PCA(data);
-            //var res = algor2.MakeComponents();
-
-            //var algor = new KMeansAlgorithm(3, res);
+            //var algor = new KMeansAlgorithm(3, array);
             //algor.SplitOnClusters();
-
-
-
-            //TwoScatter(patData1, patData2, algor.Labels);
-            //ScatterChart(patData, algor.Labels);
-            LineChart(patData1, patData2, patData3, algor.Labels);
         }
 
         public void ScatterChart(List<double> data, int[] labels)
@@ -177,9 +139,115 @@ namespace Diploma.Presentation
             }
         }
 
-        public void SetDataToDataGrid(List<Patient> patients)
+        public void FillDataToElements()
         {
-            PatientsDataGrid.ItemsSource = patients;
+            PatientsDataGrid.ItemsSource = Patients;
+
+            var attributes = new List<string>
+            {
+                "FirstTest",
+                "SecondTest",
+                "ThirdTest",
+                "FourthTest",
+                "FifthTest",
+                "AfterFourtyMinutesTest",
+                "FigurativeMemoryTest",
+                "Time",
+                "Result",
+                "SemanticMemoryTest",
+                "VMemoryTest",
+                "MunstAttentionTest",
+                "EUTest",
+                "CAVTest",
+                "ARTest",
+                "VRTest",
+                "PUTest",
+                "MPTest",
+                "MUTest",
+                "VPTest",
+                "VUTest",
+                "VATest",
+                "MAETest",
+                "VAETest",
+                "PATest",
+                "UATest",
+                "OUTest",
+                "COTTest",
+                "SPTest",
+                "EbbinghouseTest",
+                "EliminateUnnecessaryTest",
+                "AnalogiesTest"
+            };
+            AttributesCB.ItemsSource = attributes;
+            AttributesCB.SelectedIndex = 0;
+
+            AlgorithmCB.ItemsSource = new List<string>{ "EM", "SEM"};
+            AlgorithmCB.SelectedIndex = 0;
+        }
+
+        public void FillAllPatientsChart()
+        {
+            var style = new Style(typeof(DataPoint));
+            style.Setters.Add(new Setter(Shape.StrokeProperty, Brushes.Blue));
+            style.Setters.Add(new Setter(Shape.StrokeThicknessProperty, 1.0));
+
+            var legendStyle = new Style(typeof(Legend));
+            legendStyle.Setters.Add(new Setter(VisibilityProperty, Visibility.Collapsed));
+            legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
+            legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
+            AllPatientsChart.LegendStyle = legendStyle;
+
+            foreach (var p in Patients)
+            {
+                var series = new LineSeries
+                {
+                    DataPointStyle = style,
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y"
+                };
+                var values = PatientViewModel.GetPatientAttributes(p);
+
+                var points = new PointCollection();
+                for (var i = 0; i < values.Length; i++)
+                    points.Add(new Point(i, values[i]));
+
+                series.ItemsSource = points;
+                AllPatientsChart.Series.Add(series);
+            }
+        }
+
+        private void SplitOneAttribute_OnClick(object sender, RoutedEventArgs e)
+        {
+            var indexOfAttribute = AttributesCB.SelectedIndex;
+            var data = GetDataOfAttribute(indexOfAttribute);
+            int amountOfClusters = int.TryParse(AmountOfClusterTB.Text, out amountOfClusters) ? amountOfClusters : 2;
+            EMAlgorithm algorithm = null;
+            var distribution = new NormalDistribution();
+            var eps = 0.00001;
+
+            switch (AlgorithmCB.SelectedIndex)
+            {
+                case 0:
+                    algorithm = new EMAlgorithm(amountOfClusters, distribution, data.ToList(), eps);
+                    break;
+                case 1:
+                    algorithm = new SEMAlgorithm(amountOfClusters, distribution, data.ToList(), eps);
+                    break;
+            }
+            algorithm.SplitOnClusters();
+            var labels = algorithm.Labels;
+            HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, amountOfClusters);
+        }
+
+        private double[] GetDataOfAttribute(int index)
+        {
+            var array = new double[AmountOfPatients];
+            for (var i = 0; i < AmountOfPatients; i++)
+            {
+                array[i] = AttributeMatrix[i, index];
+            }
+
+            return array;
         }
     }
 }

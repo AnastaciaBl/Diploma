@@ -1,10 +1,7 @@
 ﻿using Diploma.Algorithms.Distribution;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Diploma.Algorithms.EM
 {
@@ -31,7 +28,7 @@ namespace Diploma.Algorithms.EM
                 MStep();
                 EStep();
                 index++;
-            } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 50));
+            } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 500));
 
             SetUpLabels();
         }

@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Diploma.Data
 {
@@ -19,6 +17,21 @@ namespace Diploma.Data
                 patients.Add(CreatePatient(str));
             }
             return patients;
+        }
+
+        public double[,] GetAttributesMatrix(List<Patient> patients)
+        {
+            var matrix = new double[patients.Count, Constant.AMOUNT_OF_ATTRIBUTES];
+            for(var i=0;i<patients.Count;i++)
+            {
+                var attributes = Patient.GetPatientAttributes(patients[i]);
+                for (var j = 0; j < Constant.AMOUNT_OF_ATTRIBUTES; j++)
+                {
+                    matrix[i, j] = attributes[j];
+                }
+            }
+
+            return matrix;
         }
 
         private List<string> ReadLinesFromCsv(string filePath)
