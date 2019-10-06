@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using Diploma.Algorithms.Distribution;
 using Diploma.Algorithms.EM;
+using Diploma.Algorithms.StatisticalAnalysis;
 
 namespace Diploma.Presentation
 {
@@ -88,7 +89,7 @@ namespace Diploma.Presentation
                 }
             }
 
-            DataLines.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
+            //DataLines.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
         }
 
         public void TwoScatter(List<double> x, List<double> y, int[] labels)
@@ -106,7 +107,7 @@ namespace Diploma.Presentation
                 else sChart3.Add(new Point(x[i], y[i]));
             }
 
-            TwoScatterChart.DataContext = new { points1 = sChart1, points2 = sChart2, points3 = sChart3 };
+            //TwoScatterChart.DataContext = new { points1 = sChart1, points2 = sChart2, points3 = sChart3 };
         }
 
         public double[][] CreateDataSet(List<double> x, List<double> y)
@@ -237,6 +238,9 @@ namespace Diploma.Presentation
             algorithm.SplitOnClusters();
             var labels = algorithm.Labels;
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, amountOfClusters);
+            FillBarChart(data, algorithm.HiddenVector, amountOfClusters);
+            //!!!
+            ScatterChart(data.ToList(), algorithm.Labels);
         }
 
         private double[] GetDataOfAttribute(int index)
@@ -248,6 +252,53 @@ namespace Diploma.Presentation
             }
 
             return array;
+        }
+
+        private void FillBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters)
+        {
+            OneAttributeBarChart.Series.Clear();
+            var barChartData = new BarChartData(data);
+            var values = new List<KeyValuePair<int, double>>();
+            for(var i = 0; i < barChartData.AmountOfClasses; i++)
+            {
+                values.Add(new KeyValuePair<int, double>(i + 1, barChartData.Frequency[i] / barChartData.Height));
+            }
+            var series = new BarSeries()
+            {
+                IndependentValuePath = "Key",
+                DependentValuePath = "Value"
+            };
+
+            //var distribution = new NormalDistribution();
+            //var amountOfPoints = (int)data.Max() * 10;
+            //for (var i = 0; i < amountOfClusters; i++)
+            //{
+            //    var smoothLineSeries = new ScatterSeries()
+            //    {
+            //        IndependentValuePath = "X",
+            //        DependentValuePath = "Y"
+            //    };
+            //    var points = new PointCollection();
+            //    var x = 0.0;
+                
+            //    for(var j = 0; j < amountOfPoints; j++)
+            //    {
+            //        var p = distribution.CountProbabilityFunctionResult(hiddenVector[i].MStruct,
+            //            hiddenVector[i].GStruct, x);
+            //        points.Add(new Point(p, x));
+            //        x = x + 0.1;
+            //    }
+            //    smoothLineSeries.ItemsSource = points;
+            //    OneAttributeBarChart.Series.Add(smoothLineSeries);
+            //}
+
+            //var series = new ColumnSeries()
+            //{
+            //    IndependentValuePath = "Key",
+            //    DependentValuePath = "Value"
+            //};
+            series.ItemsSource = values;
+            OneAttributeBarChart.Series.Add(series);
         }
     }
 }

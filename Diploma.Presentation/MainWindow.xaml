@@ -111,7 +111,7 @@
                         </charts:Chart>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Linear" VerticalAlignment="Top">
+                <!--<TabItem Header="Linear" VerticalAlignment="Top">
                     <Grid Background="#FFE5E5E5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -145,7 +145,7 @@
                             <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
                         </charts:Chart>
                     </Grid>
-                </TabItem>
+                </TabItem> -->
             </TabControl>
         </Grid>
     </Grid>
