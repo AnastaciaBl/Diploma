@@ -86,8 +86,8 @@
 
                         <charts:Chart x:Name="OneAttributeBarChart" Grid.Column="1" Margin="5,5,5,5">
                             <charts:Chart.Axes>
-                                <charts:LinearAxis Orientation="X" Minimum="0"/>
-                                <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
+                                <charts:LinearAxis Orientation="X" Minimum="0" Interval="0.5"/>
+                                <charts:LinearAxis Orientation="Y" Minimum="0"  Location="Left"/>
                             </charts:Chart.Axes>
                         </charts:Chart>
                     </Grid>

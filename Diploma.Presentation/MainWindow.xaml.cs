@@ -5,6 +5,7 @@ using Diploma.Presentation.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
@@ -34,7 +35,7 @@ namespace Diploma.Presentation
             AttributeMatrix = reader.GetAttributesMatrix(patients);
             Patients = PatientViewModel.SetListOfPatientViewModel(patients);
             FillDataToElements();
-            //FillAllPatientsChart();
+            FillAllPatientsChart();
 
             
             //var algor = new EMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
@@ -240,7 +241,7 @@ namespace Diploma.Presentation
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, amountOfClusters);
             FillBarChart(data, algorithm.HiddenVector, amountOfClusters);
             //!!!
-            ScatterChart(data.ToList(), algorithm.Labels);
+            //ScatterChart(data.ToList(), algorithm.Labels);
         }
 
         private double[] GetDataOfAttribute(int index)
@@ -257,48 +258,48 @@ namespace Diploma.Presentation
         private void FillBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters)
         {
             OneAttributeBarChart.Series.Clear();
+
             var barChartData = new BarChartData(data);
-            var values = new List<KeyValuePair<int, double>>();
-            for(var i = 0; i < barChartData.AmountOfClasses; i++)
+            var values = new PointCollection();
+            for (var i = 0; i < barChartData.AmountOfClasses; i++)
             {
-                values.Add(new KeyValuePair<int, double>(i + 1, barChartData.Frequency[i] / barChartData.Height));
+                //values.Add(new Point(barChartData.Borders[i, 0], barChartData.Frequency[i] / barChartData.Height));
+                values.Add(new Point(barChartData.Borders[i, 0], barChartData.Frequency[i]));
             }
-            var series = new BarSeries()
+
+            var series = new ColumnSeries()
             {
-                IndependentValuePath = "Key",
-                DependentValuePath = "Value"
+                Title = "BarChart",
+                IndependentValuePath = "X",
+                DependentValuePath = "Y"
             };
-
-            //var distribution = new NormalDistribution();
-            //var amountOfPoints = (int)data.Max() * 10;
-            //for (var i = 0; i < amountOfClusters; i++)
-            //{
-            //    var smoothLineSeries = new ScatterSeries()
-            //    {
-            //        IndependentValuePath = "X",
-            //        DependentValuePath = "Y"
-            //    };
-            //    var points = new PointCollection();
-            //    var x = 0.0;
-                
-            //    for(var j = 0; j < amountOfPoints; j++)
-            //    {
-            //        var p = distribution.CountProbabilityFunctionResult(hiddenVector[i].MStruct,
-            //            hiddenVector[i].GStruct, x);
-            //        points.Add(new Point(p, x));
-            //        x = x + 0.1;
-            //    }
-            //    smoothLineSeries.ItemsSource = points;
-            //    OneAttributeBarChart.Series.Add(smoothLineSeries);
-            //}
-
-            //var series = new ColumnSeries()
-            //{
-            //    IndependentValuePath = "Key",
-            //    DependentValuePath = "Value"
-            //};
             series.ItemsSource = values;
             OneAttributeBarChart.Series.Add(series);
+
+            //linearChart
+            var distribution = new NormalDistribution();
+            var amountOfPoints = (int)data.Max() * 10;
+            for (var i = 0; i < amountOfClusters; i++)
+            {
+                var smoothLineSeries = new ScatterSeries()
+                {
+                    Title = $"{i+1} cluster",
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y"
+                };
+                var points = new PointCollection();
+                var x = 0.0;
+
+                for (var j = 0; j < amountOfPoints; j++)
+                {
+                    var p = distribution.CountProbabilityFunctionResult(hiddenVector[i].MStruct,
+                        hiddenVector[i].GStruct, x);
+                    points.Add(new Point(x, p));
+                    x = x + 0.1;
+                }
+                smoothLineSeries.ItemsSource = points;
+                OneAttributeBarChart.Series.Add(smoothLineSeries);
+            }
         }
     }
 }
