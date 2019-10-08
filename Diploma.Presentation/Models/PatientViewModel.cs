@@ -8,7 +8,6 @@ namespace Diploma.Presentation.Models
     {
         public int Id { get; set; }
         public int RegistrationYear { get; set; }
-        public string Name { get; set; }
         public double FinalResult { get; set; }
 
         //*****Memory
@@ -78,7 +77,6 @@ namespace Diploma.Presentation.Models
                 {
                     Id = p.Id,
                     RegistrationYear = p.RegistrationYear,
-                    Name = p.Name,
                     FinalResult = p.FinalResult,
 
                     //memory
