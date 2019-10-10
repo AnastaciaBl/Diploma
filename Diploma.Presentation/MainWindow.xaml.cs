@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using Diploma.Algorithms.Distribution;
 using Diploma.Algorithms.EM;
 using Diploma.Algorithms.StatisticalAnalysis;
+using Diploma.Model;
 
 namespace Diploma.Presentation
 {
@@ -22,117 +23,24 @@ namespace Diploma.Presentation
     public partial class MainWindow : Window
     {
         private int AmountOfPatients { get; }
-        private List<PatientViewModel> Patients { get; }
-        private double[,] AttributeMatrix { get; }
+        private List<Patient> Patients { get; }
+        private List<PatientViewModel> PatientsVM { get; }
+        private double[][] AttributeMatrix { get; }
 
         public MainWindow()
         {
             InitializeComponent();
 
             var reader = new PatientReader();
-            var patients = reader.ReadSetOfPatientsFromCsv("data.csv");
-            AmountOfPatients = patients.Count;
-            AttributeMatrix = reader.GetAttributesMatrix(patients);
-            Patients = PatientViewModel.SetListOfPatientViewModel(patients);
+            Patients = reader.ReadSetOfPatientsFromCsv("data.csv");
+            AmountOfPatients = Patients.Count;
+            AttributeMatrix = reader.GetAttributesMatrix(Patients);
+            PatientsVM = PatientViewModel.SetListOfPatientViewModel(Patients);
             FillDataToElements();
             FillAllPatientsChart();
-
-            
-            //var algor = new EMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
-            //var algor = new SEMAlgorithm(2, new NormalDistribution(), patData, 0.00001);
-            //var algor = new KMeansAlgorithm(3, array);
-            //algor.SplitOnClusters();
         }
 
-        public void ScatterChart(List<double> data, int[] labels)
-        {
-            var sChart1 = new PointCollection();
-            var sChart2 = new PointCollection();
-            var sChart3 = new PointCollection();
-
-            for (int i = 0; i < data.Count; i++)
-            {
-                if (labels[i] == 0)
-                    sChart1.Add(new Point(data[i], 0));
-                else if (labels[i] == 1)
-                    sChart2.Add(new Point(data[i], 0));
-                else sChart3.Add(new Point(data[i], 0));
-            }
-
-            dataAfterEMChart.DataContext = new { points1 = sChart1, points2 = sChart2, points3 = sChart3 };
-        }
-
-        public void LineChart(List<double> x1, List<double> x2, List<double> x3, int[] labels)
-        {
-            var sChart1 = new PointCollection();
-            var sChart2 = new PointCollection();
-            var sChart3 = new PointCollection();
-
-            for (int i = 0; i < labels.Length; i++)
-            {
-                if (labels[i] == 0)
-                {
-                    sChart1.Add(new Point(x1[i], 1));
-                    sChart1.Add(new Point(x2[i], 1));
-                    sChart1.Add(new Point(x3[i], 1));
-                }
-                else if (labels[i] == 1)
-                {
-                    sChart2.Add(new Point(x1[i], 2));
-                    sChart2.Add(new Point(x2[i], 2));
-                    sChart2.Add(new Point(x3[i], 2));
-                }
-                else
-                {
-                    sChart3.Add(new Point(x1[i], 3));
-                    sChart3.Add(new Point(x2[i], 3));
-                    sChart3.Add(new Point(x3[i], 3));
-                }
-            }
-
-            //DataLines.DataContext = new {points1 = sChart1, points2 = sChart2, points3 = sChart3};
-        }
-
-        public void TwoScatter(List<double> x, List<double> y, int[] labels)
-        {
-            var sChart1 = new PointCollection();
-            var sChart2 = new PointCollection();
-            var sChart3 = new PointCollection();
-
-            for (int i = 0; i < labels.Length; i++)
-            {
-                if (labels[i] == 0)
-                    sChart1.Add(new Point(x[i], y[i]));
-                else if (labels[i] == 1)
-                    sChart2.Add(new Point(x[i], y[i]));
-                else sChart3.Add(new Point(x[i], y[i]));
-            }
-
-            //TwoScatterChart.DataContext = new { points1 = sChart1, points2 = sChart2, points3 = sChart3 };
-        }
-
-        public double[][] CreateDataSet(List<double> x, List<double> y)
-        {
-            var array = new double[x.Count][];
-            for (var i = 0; i < x.Count; i++)
-            {
-                array[i] = new [] { x[i], y[i] };
-            }
-
-            return array;
-        }
-
-        public double[][] CreateDataSet(List<double> x, List<double> x2, List<double> x3)
-        {
-            var array = new double[x.Count][];
-            for (var i = 0; i < x.Count; i++)
-            {
-                array[i] = new[] { x[i], x2[i], x3[i] };
-            }
-
-            return array;
-        }
-
+        //can be useful
         public void FillData(ref PointCollection array, List<double> data)
         {
             for (int i = 0; i < data.Count; i++)
@@ -143,7 +51,7 @@ namespace Diploma.Presentation
 
         public void FillDataToElements()
         {
-            PatientsDataGrid.ItemsSource = Patients;
+            PatientsDataGrid.ItemsSource = PatientsVM;
 
             var attributes = new List<string>
             {
@@ -189,8 +97,8 @@ namespace Diploma.Presentation
 
         public void FillAllPatientsChart()
         {
-            var style = new Style(typeof(DataPoint));
-            style.Setters.Add(new Setter(Shape.StrokeProperty, Brushes.Blue));
+            var style = new Style(typeof(LineDataPoint));
+            style.Setters.Add(new Setter(BackgroundProperty, Brushes.CornflowerBlue));
             style.Setters.Add(new Setter(Shape.StrokeThicknessProperty, 1.0));
 
             var legendStyle = new Style(typeof(Legend));
@@ -199,7 +107,7 @@ namespace Diploma.Presentation
             legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
             AllPatientsChart.LegendStyle = legendStyle;
 
-            foreach (var p in Patients)
+            foreach (var p in PatientsVM)
             {
                 var series = new LineSeries
                 {
@@ -239,9 +147,7 @@ namespace Diploma.Presentation
             algorithm.SplitOnClusters();
             var labels = algorithm.Labels;
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, amountOfClusters);
-            FillBarChart(data, algorithm.HiddenVector, amountOfClusters);
-            //!!!
-            //ScatterChart(data.ToList(), algorithm.Labels);
+            FillBarChart(data, algorithm.HiddenVector, amountOfClusters, labels);
         }
 
         private double[] GetDataOfAttribute(int index)
@@ -249,13 +155,13 @@ namespace Diploma.Presentation
             var array = new double[AmountOfPatients];
             for (var i = 0; i < AmountOfPatients; i++)
             {
-                array[i] = AttributeMatrix[i, index];
+                array[i] = AttributeMatrix[i][index];
             }
 
             return array;
         }
 
-        private void FillBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters)
+        private void FillBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters, int[] labels)
         {
             OneAttributeBarChart.Series.Clear();
 
@@ -276,29 +182,112 @@ namespace Diploma.Presentation
             series.ItemsSource = values;
             OneAttributeBarChart.Series.Add(series);
 
+            //scatterChart
             //linearChart
             var distribution = new NormalDistribution();
             var amountOfPoints = (int)data.Max() * 10;
+            var x = 0.0;
+            var smoothLinePoints = new PointCollection();
+            var smoothLineSeries = new ScatterSeries()
+            {
+                Title = "Probability density",
+                IndependentValuePath = "X",
+                DependentValuePath = "Y"
+            };
             for (var i = 0; i < amountOfClusters; i++)
             {
-                var smoothLineSeries = new ScatterSeries()
+                var scatterSeries = new ScatterSeries()
                 {
-                    Title = $"{i+1} cluster",
+                    Title = $"{i + 1} cluster",
                     IndependentValuePath = "X",
                     DependentValuePath = "Y"
                 };
-                var points = new PointCollection();
-                var x = 0.0;
+                var scatterPoints = new PointCollection();
 
                 for (var j = 0; j < amountOfPoints; j++)
                 {
-                    var p = distribution.CountProbabilityFunctionResult(hiddenVector[i].MStruct,
-                        hiddenVector[i].GStruct, x);
-                    points.Add(new Point(x, p));
-                    x = x + 0.1;
+                    if (labels[j] == i)
+                        scatterPoints.Add(new Point(data[j], 0));
+
+                    if (i + 1 == amountOfClusters)
+                    {
+                        double p = 0;
+                        for (var t = 0; t < amountOfClusters; t++)
+                        {
+                            p += hiddenVector[t].СStruct * distribution.CountProbabilityFunctionResult(
+                                     hiddenVector[t].MStruct,
+                                     hiddenVector[t].GStruct, x);
+                        }
+                        smoothLinePoints.Add(new Point(x, p));
+                        x += 0.1;
+                    }
                 }
-                smoothLineSeries.ItemsSource = points;
-                OneAttributeBarChart.Series.Add(smoothLineSeries);
+                scatterSeries.ItemsSource = scatterPoints;
+                OneAttributeBarChart.Series.Add(scatterSeries);
+            }
+            smoothLineSeries.ItemsSource = smoothLinePoints;
+            OneAttributeBarChart.Series.Add(smoothLineSeries);
+        }
+
+        private void AmountOfClusterKMeans_OnClick(object sender, RoutedEventArgs e)
+        {
+            var amountOfClusters = Convert.ToInt32(AmountOfClustersKMeansTB.Text);
+            var kMeans = new KMeansAlgorithm(amountOfClusters, AttributeMatrix);
+            kMeans.SplitOnClusters();
+
+            AllPatientsChart.Series.Clear();
+            for (var i = 0; i < AmountOfPatients; i++)
+            {
+                SolidColorBrush color = null;
+                switch (kMeans.Labels[i])
+                {
+                    case 0:
+                        color = new SolidColorBrush(Colors.Blue);
+                        break;
+                    case 1:
+                        color = new SolidColorBrush(Colors.Crimson);
+                        break;
+                    case 2:
+                        color = new SolidColorBrush(Colors.DarkMagenta);
+                        break;
+                    case 3:
+                        color = new SolidColorBrush(Colors.DarkOrange);
+                        break;
+                    case 4:
+                        color = new SolidColorBrush(Colors.DarkGreen);
+                        break;
+                    case 5:
+                        color = new SolidColorBrush(Colors.HotPink);
+                        break;
+                    case 6:
+                        color = new SolidColorBrush(Colors.DeepSkyBlue);
+                        break;
+                    case 7:
+                        color = new SolidColorBrush(Colors.Chartreuse);
+                        break;
+                    default:
+                        color = new SolidColorBrush(Colors.Gold);
+                        break;
+                }
+
+                var style = new Style(typeof(LineDataPoint));
+                style.Setters.Add(new Setter(BackgroundProperty, color));
+
+                var series = new LineSeries()
+                {
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y",
+                    DataPointStyle = style
+                };
+                var points = new PointCollection();
+
+                for (var j = 0; j < Constant.AMOUNT_OF_ATTRIBUTES; j++)
+                {
+                    points.Add(new Point(j, AttributeMatrix[i][j]));
+                }
+
+                series.ItemsSource = points;
+                AllPatientsChart.Series.Add(series);
             }
         }
     }

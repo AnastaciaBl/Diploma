@@ -19,16 +19,13 @@ namespace Diploma.Data
             return patients;
         }
 
-        public double[,] GetAttributesMatrix(List<Patient> patients)
+        public double[][] GetAttributesMatrix(List<Patient> patients)
         {
-            var matrix = new double[patients.Count, Constant.AMOUNT_OF_ATTRIBUTES];
+            var matrix = new double[patients.Count][];
             for(var i=0;i<patients.Count;i++)
             {
                 var attributes = Patient.GetPatientAttributes(patients[i]);
-                for (var j = 0; j < Constant.AMOUNT_OF_ATTRIBUTES; j++)
-                {
-                    matrix[i, j] = attributes[j];
-                }
+                matrix[i] = attributes;
             }
 
             return matrix;

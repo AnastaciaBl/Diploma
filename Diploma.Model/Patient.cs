@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Diploma.Model
 {
@@ -37,7 +38,7 @@ namespace Diploma.Model
 
                     p.MemoryResult.FigurativeMemoryTest.Result,
 
-                    p.MemoryResult.VisualMemoryTest.Time,
+                    Math.Round(p.MemoryResult.VisualMemoryTest.Time / 60.0, 2),
                     p.MemoryResult.VisualMemoryTest.Result,
 
                     p.MemoryResult.SemanticMemoryTest.Result,

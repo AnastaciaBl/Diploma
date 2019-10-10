@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:charts="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+        xmlns:primitives="clr-namespace:System.Windows.Controls.DataVisualization.Charting.Primitives;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+        xmlns:visualizationToolkit="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="493" Width="807">
     <Grid>
@@ -39,12 +41,35 @@
                         </Grid.ColumnDefinitions>
 
                         <DataGrid Name="PatientsDataGrid" Grid.Column="0" Margin="5,5,5,5" AutoGenerateColumns="True" ItemsSource="{Binding patients}"/>
-                        <charts:Chart x:Name="AllPatientsChart" Grid.Column="1" Margin="5,5,5,5">
-                            <charts:Chart.Axes>
-                                <charts:LinearAxis Orientation="X" Minimum="0"/>
-                                <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
-                            </charts:Chart.Axes>
-                        </charts:Chart>
+
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.9*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0" Content="Amount of clusters:" Margin="35,5,5,5" HorizontalAlignment="Left"/>
+                            <TextBox Name="AmountOfClustersKMeansTB" Grid.Row="0" Text="2" Margin="155,5,5,5" Width="100"  TextAlignment="Center"  HorizontalAlignment="Left"></TextBox>
+                            <Button Name="AmountOfClusterKMeans" Grid.Row="0" Content="Split on clusters" Margin="5,5,5,5" Width="200" HorizontalAlignment="Right" Click="AmountOfClusterKMeans_OnClick"/>
+
+                            <charts:Chart x:Name="AllPatientsChart" Grid.Row="1" Margin="5,5,5,5">
+                                <charts:Chart.Template>
+                                    <ControlTemplate TargetType="charts:Chart">
+                                        <DockPanel>
+                                            <visualizationToolkit:Legend x:Name="Legend" Style="{TemplateBinding LegendStyle}" DockPanel.Dock="Right" />
+                                            <primitives:EdgePanel x:Name="ChartArea" Style="{TemplateBinding ChartAreaStyle}">
+                                                <Grid Canvas.ZIndex="-1" Style="{TemplateBinding PlotAreaStyle}" />
+                                                <Border Canvas.ZIndex="10" BorderBrush="#FF919191" BorderThickness="1" />
+                                            </primitives:EdgePanel>
+                                        </DockPanel>
+                                    </ControlTemplate>
+                                </charts:Chart.Template>
+                                <charts:Chart.Axes>
+                                    <charts:LinearAxis Orientation="X" Minimum="0"/>
+                                    <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
+                                </charts:Chart.Axes>
+                            </charts:Chart>
+                        </Grid>
                     </Grid>
                 </TabItem>
                 <TabItem Header="EM and SEM">
@@ -86,66 +111,12 @@
 
                         <charts:Chart x:Name="OneAttributeBarChart" Grid.Column="1" Margin="5,5,5,5">
                             <charts:Chart.Axes>
-                                <charts:LinearAxis Orientation="X" Minimum="0" Interval="0.5"/>
-                                <charts:LinearAxis Orientation="Y" Minimum="0"  Location="Left"/>
+                                <charts:LinearAxis Orientation="X" Minimum="0" />
+                                <charts:LinearAxis Orientation="Y"   Location="Left"/>
                             </charts:Chart.Axes>
                         </charts:Chart>
                     </Grid>
                 </TabItem>
-                <TabItem Header="One dimension" VerticalAlignment="Top">
-                    <Grid Background="#FFE5E5E5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <charts:Chart x:Name="dataAfterEMChart" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" >
-                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points1}"/>
-                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points2}"/>
-                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
-                            <charts:Chart.Axes>
-                                <charts:LinearAxis Orientation="Y" Minimum="-1" Maximum="1" Interval="1" />
-                            </charts:Chart.Axes>
-                        </charts:Chart>
-                    </Grid>
-                </TabItem>
-                <!--<TabItem Header="Linear" VerticalAlignment="Top">
-                    <Grid Background="#FFE5E5E5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <charts:Chart x:Name="DataLines" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" >
-                            <charts:LineSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points1}"/>
-                            <charts:LineSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points2}"/>
-                            <charts:LineSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
-                            <charts:Chart.Axes>
-                                <charts:LinearAxis Orientation="Y" Minimum="0" Maximum="4" Interval="1" />
-                            </charts:Chart.Axes>
-                        </charts:Chart>
-                    </Grid>
-                </TabItem>
-                <TabItem Header="Two dimensions" VerticalAlignment="Top">
-                    <Grid Background="#FFE5E5E5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <charts:Chart x:Name="TwoScatterChart" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" >
-                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points1}"/>
-                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points2}"/>
-                            <charts:ScatterSeries IndependentValuePath="X" DependentValuePath="Y" ItemsSource="{Binding points3}"/>
-                        </charts:Chart>
-                    </Grid>
-                </TabItem> -->
             </TabControl>
         </Grid>
     </Grid>
