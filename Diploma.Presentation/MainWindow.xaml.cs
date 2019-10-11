@@ -204,11 +204,14 @@ namespace Diploma.Presentation
                 };
                 var scatterPoints = new PointCollection();
 
-                for (var j = 0; j < amountOfPoints; j++)
+                for (var j = 0; j < data.Length; j++)
                 {
                     if (labels[j] == i)
                         scatterPoints.Add(new Point(data[j], 0));
+                }
 
+                for (var j = 0; j < amountOfPoints; j++)
+                {
                     if (i + 1 == amountOfClusters)
                     {
                         double p = 0;
