@@ -37,7 +37,7 @@ namespace Diploma.Presentation
             AttributeMatrix = reader.GetAttributesMatrix(Patients);
             PatientsVM = PatientViewModel.SetListOfPatientViewModel(Patients);
             FillDataToElements();
-            FillAllPatientsChart();
+            //FillAllPatientsChart();
         }
 
         //can be useful
@@ -163,32 +163,51 @@ namespace Diploma.Presentation
 
         private void FillBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters, int[] labels)
         {
-            OneAttributeBarChart.Series.Clear();
+            var legendStyle = new Style(typeof(Legend));
+            legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
+            legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
+            OneAttributeBarChart.LegendStyle = legendStyle;
 
+            OneAttributeBarChart.Series.Clear();
             var barChartData = new BarChartData(data);
-            var values = new PointCollection();
+
+            var style = new Style(typeof(AreaDataPoint));
+            style.Setters.Add(new Setter(BackgroundProperty, Brushes.Crimson));
+
             for (var i = 0; i < barChartData.AmountOfClasses; i++)
             {
-                //values.Add(new Point(barChartData.Borders[i, 0], barChartData.Frequency[i] / barChartData.Height));
-                values.Add(new Point(barChartData.Borders[i, 0], barChartData.Frequency[i]));
+                //var frequency = Math.Round(barChartData.Frequency[i] / barChartData.Height, 3);
+                var frequency = Math.Round(barChartData.Frequency[i], 3);
+                var values = new PointCollection();
+                var areaSeries = new AreaSeries()
+                {
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y",
+                    DataPointStyle = style
+                };
+                values.Add(new Point(barChartData.Borders[i, 0], frequency));
+                values.Add(new Point(barChartData.Borders[i, 1], frequency));
+                areaSeries.ItemsSource = values;
+                OneAttributeBarChart.Series.Add(areaSeries);
             }
 
-            var series = new ColumnSeries()
-            {
-                Title = "BarChart",
-                IndependentValuePath = "X",
-                DependentValuePath = "Y"
-            };
-            series.ItemsSource = values;
-            OneAttributeBarChart.Series.Add(series);
+
+            //var series = new ColumnSeries()
+            //{
+            //    Title = "BarChart",
+            //    IndependentValuePath = "X",
+            //    DependentValuePath = "Y"                
+            //};
+            //series.ItemsSource = values;
+            //OneAttributeBarChart.Series.Add(series);
 
             //scatterChart
             //linearChart
             var distribution = new NormalDistribution();
-            var amountOfPoints = (int)data.Max() * 10;
-            var x = 0.0;
+            var x = data.Min();
+            var amountOfPoints = (int)(data.Max() - x) * 10;
             var smoothLinePoints = new PointCollection();
-            var smoothLineSeries = new ScatterSeries()
+            var smoothLineSeries = new LineSeries()
             {
                 Title = "Probability density",
                 IndependentValuePath = "X",
