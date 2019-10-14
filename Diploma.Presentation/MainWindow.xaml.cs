@@ -5,7 +5,6 @@ using Diploma.Presentation.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
@@ -14,6 +13,7 @@ using Diploma.Algorithms.Distribution;
 using Diploma.Algorithms.EM;
 using Diploma.Algorithms.StatisticalAnalysis;
 using Diploma.Model;
+using Microsoft.Win32;
 
 namespace Diploma.Presentation
 {
@@ -22,22 +22,14 @@ namespace Diploma.Presentation
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int AmountOfPatients { get; }
-        private List<Patient> Patients { get; }
-        private List<PatientViewModel> PatientsVM { get; }
-        private double[][] AttributeMatrix { get; }
+        private int AmountOfPatients { get; set; }
+        private List<Patient> Patients { get; set; }
+        private List<PatientViewModel> PatientsVM { get; set; }
+        private double[][] AttributeMatrix { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
-
-            var reader = new PatientReader();
-            Patients = reader.ReadSetOfPatientsFromCsv("data.csv");
-            AmountOfPatients = Patients.Count;
-            AttributeMatrix = reader.GetAttributesMatrix(Patients);
-            PatientsVM = PatientViewModel.SetListOfPatientViewModel(Patients);
-            FillDataToElements();
-            //FillAllPatientsChart();
         }
 
         //can be useful
@@ -176,8 +168,8 @@ namespace Diploma.Presentation
 
             for (var i = 0; i < barChartData.AmountOfClasses; i++)
             {
-                //var frequency = Math.Round(barChartData.Frequency[i] / barChartData.Height, 3);
-                var frequency = Math.Round(barChartData.Frequency[i], 3);
+                var frequency = Math.Round(barChartData.Frequency[i] / barChartData.Height, 3);
+                //var frequency = Math.Round(barChartData.Frequency[i], 3);
                 var values = new PointCollection();
                 var areaSeries = new AreaSeries()
                 {
@@ -310,6 +302,22 @@ namespace Diploma.Presentation
 
                 series.ItemsSource = points;
                 AllPatientsChart.Series.Add(series);
+            }
+        }
+
+        private void OpenFileMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+            {
+                var filePath = openFileDialog.FileName;
+                var reader = new PatientReader();
+                Patients = reader.ReadSetOfPatientsFromCsv(filePath);
+                AmountOfPatients = Patients.Count;
+                AttributeMatrix = reader.GetAttributesMatrix(Patients);
+                PatientsVM = PatientViewModel.SetListOfPatientViewModel(Patients);
+                FillDataToElements();
+                FillAllPatientsChart();
             }
         }
     }

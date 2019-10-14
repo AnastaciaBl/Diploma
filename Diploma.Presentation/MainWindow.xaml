@@ -7,7 +7,7 @@
         xmlns:primitives="clr-namespace:System.Windows.Controls.DataVisualization.Charting.Primitives;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:visualizationToolkit="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="493" Width="807">
+        Title="Diploma" Height="493" Width="807">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,7 +18,9 @@
         </Grid.ColumnDefinitions>
 
         <Menu Grid.Row="0" Grid.Column ="0" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <MenuItem Header="File..."/>
+            <MenuItem Header="File...">
+                <MenuItem Name="OpenFileMenuItem" Header="Open..." HorizontalAlignment="Left" Click="OpenFileMenuItem_Click"/>
+            </MenuItem>
         </Menu>
 
         <Grid Grid.Row="1" Grid.Column ="0" Name="TabGrid">
