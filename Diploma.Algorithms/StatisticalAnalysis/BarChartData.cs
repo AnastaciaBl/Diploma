@@ -10,9 +10,9 @@ namespace Diploma.Algorithms.StatisticalAnalysis
         public double[] Frequency { get; set; }
         public double Height { get; set; }
 
-        public BarChartData(double[] elements)
+        public BarChartData(double[] elements, int amountOfClasses)
         {
-            AmountOfClasses = CountAmountOfClasses(elements.Length);
+            AmountOfClasses = amountOfClasses == 0 ? CountAmountOfClasses(elements.Length) : amountOfClasses;
             Borders = FindClassesBorders(elements);
             Frequency = FindFrequency(elements);
         }

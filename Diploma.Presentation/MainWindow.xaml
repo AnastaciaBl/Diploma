@@ -86,9 +86,9 @@
 
                         <Grid Grid.Column="0">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="0.08*"/>
-                                <RowDefinition Height="0.08*"/>
-                                <RowDefinition Height="0.08*"/>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.2*"/>
                                 <RowDefinition Height="0.6*"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -97,17 +97,33 @@
                             <ComboBox Name="AttributesCB" Grid.Row="0"  Margin="5,5,5,5"/>
                             <Grid Grid.Row="1">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="0.47*"/>
-                                    <ColumnDefinition Width="0.2*"/>
                                     <ColumnDefinition Width="0.4*"/>
+                                    <ColumnDefinition Width="0.15*"/>
+                                    <ColumnDefinition Width="0.35*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Label Grid.Column="0" Content="Amount of clusters:"  Margin="5,5,5,5"/>
-                                <TextBox Name="AmountOfClusterTB"  Grid.Column="1" Margin="5,5,5,5" TextWrapping="Wrap" Text="2" TextAlignment="Center"/>
-                                <ComboBox Name="AlgorithmCB" Grid.Column="2" Margin="5,5,5,5"/>
+                                <Label Grid.Column="0" Margin="5,5,5,5" Content="Amount of classes:"/>
+                                <TextBox Name="AmountOfClassesTb" Grid.Column="1" Margin="5,10,5,10" TextWrapping="Wrap" Text="0" TextAlignment="Center"/>
+                                <Button Name="SplitOnClasses" Grid.Column="2" Margin="5,5,5,5" Content="Split on classes" Click="SplitOnClasses_OnClick"/>
                             </Grid>
 
-                            <Button Grid.Row="2" Margin="5,5,5,5" Content="Split on clusters" Name="SplitOneAttribute" Click="SplitOneAttribute_OnClick"/>
+                            <Grid Grid.Row="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="0.5*"/>
+                                    <RowDefinition Height="0.5*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.5*"/>
+                                    <ColumnDefinition Width="0.5*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Column="0" Margin="5,5,5,1" Content="Amount of clusters:"/>
+                                <TextBox Name="AmountOfClustersTb" Grid.Column="1" Margin="5,5,5,1" TextWrapping="Wrap" Text="2" TextAlignment="Center"/>
+
+                                <ComboBox Name="AlgorithmCb" Grid.Row="1" Grid.Column="0" Margin="5,1,5,5"/>
+                                <Button Name="SplitOneAttribute" Grid.Row="1" Grid.Column="1" Margin="5,1,5,5" Content="Split on clusters"  Click="SplitOneAttribute_OnClick"/>
+                            </Grid>
+                            
                             <DataGrid Name="HiddenVectorDG"  Grid.Row="3" Margin="5,5,5,5"/>
                         </Grid>
 
@@ -117,6 +133,17 @@
                                 <charts:LinearAxis Orientation="Y"   Location="Left"/>
                             </charts:Chart.Axes>
                         </charts:Chart>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="PCA">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <DataGrid Name="PcaParametersDg"/>
+                        <charts:Chart Name="PcaChart"></charts:Chart>
                     </Grid>
                 </TabItem>
             </TabControl>

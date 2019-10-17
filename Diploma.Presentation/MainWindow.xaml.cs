@@ -1,7 +1,12 @@
-﻿using System;
+﻿using Diploma.Algorithms.Distribution;
+using Diploma.Algorithms.EM;
 using Diploma.Algorithms.Kmeans;
+using Diploma.Algorithms.StatisticalAnalysis;
 using Diploma.Data;
+using Diploma.Model;
 using Diploma.Presentation.Models;
+using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -9,11 +14,6 @@ using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Diploma.Algorithms.Distribution;
-using Diploma.Algorithms.EM;
-using Diploma.Algorithms.StatisticalAnalysis;
-using Diploma.Model;
-using Microsoft.Win32;
 
 namespace Diploma.Presentation
 {
@@ -83,8 +83,8 @@ namespace Diploma.Presentation
             AttributesCB.ItemsSource = attributes;
             AttributesCB.SelectedIndex = 0;
 
-            AlgorithmCB.ItemsSource = new List<string>{ "EM", "SEM"};
-            AlgorithmCB.SelectedIndex = 0;
+            AlgorithmCb.ItemsSource = new List<string>{ "EM", "SEM"};
+            AlgorithmCb.SelectedIndex = 0;
         }
 
         public void FillAllPatientsChart()
@@ -122,12 +122,13 @@ namespace Diploma.Presentation
         {
             var indexOfAttribute = AttributesCB.SelectedIndex;
             var data = GetDataOfAttribute(indexOfAttribute);
-            int amountOfClusters = int.TryParse(AmountOfClusterTB.Text, out amountOfClusters) ? amountOfClusters : 2;
+            int amountOfClusters = int.TryParse(AmountOfClustersTb.Text, out amountOfClusters) ? amountOfClusters : 2;
+            int amountOfClasses = int.TryParse(AmountOfClassesTb.Text, out amountOfClasses) ? amountOfClasses : 0;
             EMAlgorithm algorithm = null;
             var distribution = new NormalDistribution();
             var eps = 0.00001;
 
-            switch (AlgorithmCB.SelectedIndex)
+            switch (AlgorithmCb.SelectedIndex)
             {
                 case 0:
                     algorithm = new EMAlgorithm(amountOfClusters, distribution, data.ToList(), eps);
@@ -139,7 +140,8 @@ namespace Diploma.Presentation
             algorithm.SplitOnClusters();
             var labels = algorithm.Labels;
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, amountOfClusters);
-            FillBarChart(data, algorithm.HiddenVector, amountOfClusters, labels);
+            FillBarChart(data, amountOfClasses);
+            SetProbabilityDensityOnBarChart(data, algorithm.HiddenVector, amountOfClusters, labels);
         }
 
         private double[] GetDataOfAttribute(int index)
@@ -153,48 +155,8 @@ namespace Diploma.Presentation
             return array;
         }
 
-        private void FillBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters, int[] labels)
+        private void SetProbabilityDensityOnBarChart(double[] data, List<Parameters> hiddenVector, int amountOfClusters, int[] labels)
         {
-            var legendStyle = new Style(typeof(Legend));
-            legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
-            legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
-            OneAttributeBarChart.LegendStyle = legendStyle;
-
-            OneAttributeBarChart.Series.Clear();
-            var barChartData = new BarChartData(data);
-
-            var style = new Style(typeof(AreaDataPoint));
-            style.Setters.Add(new Setter(BackgroundProperty, Brushes.Crimson));
-
-            for (var i = 0; i < barChartData.AmountOfClasses; i++)
-            {
-                var frequency = Math.Round(barChartData.Frequency[i] / barChartData.Height, 3);
-                //var frequency = Math.Round(barChartData.Frequency[i], 3);
-                var values = new PointCollection();
-                var areaSeries = new AreaSeries()
-                {
-                    IndependentValuePath = "X",
-                    DependentValuePath = "Y",
-                    DataPointStyle = style
-                };
-                values.Add(new Point(barChartData.Borders[i, 0], frequency));
-                values.Add(new Point(barChartData.Borders[i, 1], frequency));
-                areaSeries.ItemsSource = values;
-                OneAttributeBarChart.Series.Add(areaSeries);
-            }
-
-
-            //var series = new ColumnSeries()
-            //{
-            //    Title = "BarChart",
-            //    IndependentValuePath = "X",
-            //    DependentValuePath = "Y"                
-            //};
-            //series.ItemsSource = values;
-            //OneAttributeBarChart.Series.Add(series);
-
-            //scatterChart
-            //linearChart
             var distribution = new NormalDistribution();
             var x = data.Min();
             var amountOfPoints = (int)(data.Max() - x) * 10;
@@ -302,6 +264,46 @@ namespace Diploma.Presentation
 
                 series.ItemsSource = points;
                 AllPatientsChart.Series.Add(series);
+            }
+        }
+        
+        private void SplitOnClasses_OnClick(object sender, RoutedEventArgs e)
+        {
+            OneAttributeBarChart.Series.Clear();
+
+            var legendStyle = new Style(typeof(Legend));
+            legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
+            legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
+            OneAttributeBarChart.LegendStyle = legendStyle;
+
+            var indexOfAttribute = AttributesCB.SelectedIndex;
+            int amountOfClasses = int.TryParse(AmountOfClassesTb.Text, out amountOfClasses) ? amountOfClasses : 0;
+            var data = GetDataOfAttribute(indexOfAttribute);
+
+            FillBarChart(data, amountOfClasses);
+        }
+
+        private void FillBarChart(double[] data, int amountOfClasses)
+        {
+            var barChartData = new BarChartData(data, amountOfClasses);
+
+            var style = new Style(typeof(AreaDataPoint));
+            style.Setters.Add(new Setter(BackgroundProperty, Brushes.Coral));
+
+            for (var i = 0; i < barChartData.AmountOfClasses; i++)
+            {
+                var frequency = Math.Round(barChartData.Frequency[i] / barChartData.Height, 3);
+                var values = new PointCollection();
+                var areaSeries = new AreaSeries()
+                {
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y",
+                    DataPointStyle = style
+                };
+                values.Add(new Point(barChartData.Borders[i, 0], frequency));
+                values.Add(new Point(barChartData.Borders[i, 1], frequency));
+                areaSeries.ItemsSource = values;
+                OneAttributeBarChart.Series.Add(areaSeries);
             }
         }
 
