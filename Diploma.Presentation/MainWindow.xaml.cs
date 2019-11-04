@@ -14,6 +14,7 @@ using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Diploma.Algorithms.PCA;
 
 namespace Diploma.Presentation
 {
@@ -26,10 +27,18 @@ namespace Diploma.Presentation
         private List<Patient> Patients { get; set; }
         private List<PatientViewModel> PatientsVM { get; set; }
         private double[][] AttributeMatrix { get; set; }
+        private PCA PcaResult { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
+
+            var legendStyle = new Style(typeof(Legend));
+            legendStyle.Setters.Add(new Setter(VisibilityProperty, Visibility.Collapsed));
+            legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
+            legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
+            AllPatientsChart.LegendStyle = legendStyle;
+            PcaChart.LegendStyle = legendStyle;
         }
 
         //can be useful
@@ -92,12 +101,6 @@ namespace Diploma.Presentation
             var style = new Style(typeof(LineDataPoint));
             style.Setters.Add(new Setter(BackgroundProperty, Brushes.CornflowerBlue));
             style.Setters.Add(new Setter(Shape.StrokeThicknessProperty, 1.0));
-
-            var legendStyle = new Style(typeof(Legend));
-            legendStyle.Setters.Add(new Setter(VisibilityProperty, Visibility.Collapsed));
-            legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
-            legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
-            AllPatientsChart.LegendStyle = legendStyle;
 
             foreach (var p in PatientsVM)
             {
@@ -212,6 +215,11 @@ namespace Diploma.Presentation
             kMeans.SplitOnClusters();
 
             AllPatientsChart.Series.Clear();
+            FillChartAfterKMeansAlgorithm(kMeans, AllPatientsChart);
+        }
+
+        public void FillChartAfterKMeansAlgorithm(KMeansAlgorithm kMeans, Chart chart)
+        {
             for (var i = 0; i < AmountOfPatients; i++)
             {
                 SolidColorBrush color = null;
@@ -263,7 +271,7 @@ namespace Diploma.Presentation
                 }
 
                 series.ItemsSource = points;
-                AllPatientsChart.Series.Add(series);
+                chart.Series.Add(series);
             }
         }
         
@@ -320,7 +328,40 @@ namespace Diploma.Presentation
                 PatientsVM = PatientViewModel.SetListOfPatientViewModel(Patients);
                 FillDataToElements();
                 FillAllPatientsChart();
+                LearnPca();
             }
+        }
+
+        private void LearnPca()
+        {
+            PcaResult = new PCA(AttributeMatrix);
+            PcaResult.CreateComponents();
+
+            var pcaViewModel = new List<PcaViewModel>();
+            for (var i = 0; i < PcaResult.AmountOfComponents; i++)
+                pcaViewModel.Add(new PcaViewModel()
+                {
+                    Component = i,
+                    EigenValue = PcaResult.EigenValues[i],
+                    SingularValue = PcaResult.SingularValues[i],
+                    Proportion = PcaResult.Proportion[i],
+                    CumulativeProportion = PcaResult.CumulativeProportion[i]
+                });
+
+            PcaParametersDg.ItemsSource = pcaViewModel;
+        }
+
+        private void KMeansForPcaBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            int amountOfClusters = int.TryParse(AmountOfClustersKMeansForPca.Text, out amountOfClusters)
+                ? amountOfClusters
+                : 2;
+
+            var kMeans = new KMeansAlgorithm(amountOfClusters, PcaResult.ProjectionSet);
+            kMeans.SplitOnClusters();
+            PcaChart.Series.Clear();
+
+            FillChartAfterKMeansAlgorithm(kMeans, PcaChart);
         }
     }
 }

@@ -138,12 +138,23 @@
                 <TabItem Header="PCA">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition></ColumnDefinition>
-                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition Width="0.35*"/>
+                            <ColumnDefinition Width="0.65*"/>
                         </Grid.ColumnDefinitions>
 
-                        <DataGrid Name="PcaParametersDg"/>
-                        <charts:Chart Name="PcaChart"></charts:Chart>
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.9*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0" Content="Amount of clusters:" Margin="5,5,5,5" HorizontalAlignment="Left"/>
+                            <TextBox Name="AmountOfClustersKMeansForPca" Grid.Row="0" Text="2" Margin="120,5,5,5" Width="35"  TextAlignment="Center"  HorizontalAlignment="Left"></TextBox>
+                            <Button Name="KMeansForPcaBtn" Grid.Row="0" Content="Split on clusters" Margin="5,5,5,5" Width="110" HorizontalAlignment="Right" Click="KMeansForPcaBtn_OnClick"/>
+                            <DataGrid Grid.Row="1" Name="PcaParametersDg"/>
+                        </Grid>
+                        
+                        <charts:Chart Grid.Column="1" Name="PcaChart"/>
                     </Grid>
                 </TabItem>
             </TabControl>

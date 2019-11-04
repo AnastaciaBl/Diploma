@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="Models\HiddenVectorViewModel.cs" />
     <Compile Include="Models\PatientViewModel.cs" />
+    <Compile Include="Models\PcaViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
