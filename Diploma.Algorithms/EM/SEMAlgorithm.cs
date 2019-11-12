@@ -8,11 +8,12 @@ namespace Diploma.Algorithms.EM
     public class SEMAlgorithm: EMAlgorithm
     {
         private double[][] TempClusters { get; set; }
+        private readonly int THRESHOLD_COEFFICIENT;
 
         public SEMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps) : base(
             amountOfClusters, distribution, values, eps)
         {
-            
+            THRESHOLD_COEFFICIENT = Convert.ToInt32(AmountOfElements * 0.05);
         }
 
         public override void SplitOnClusters()
@@ -30,7 +31,15 @@ namespace Diploma.Algorithms.EM
                 index++;
             } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 500));
 
-            SetUpLabels();
+            if (IsClusterWithoutEnoughElements(THRESHOLD_COEFFICIENT))
+            {
+                AmountOfClusters--;
+                SplitOnClusters();
+            }
+            else
+            {
+                SetUpLabels();
+            }
         }
 
         private void UpdateProbabilityMatrix(Random random)
@@ -70,65 +79,16 @@ namespace Diploma.Algorithms.EM
             SetUpLabels();
         }
 
-        protected override void EStep()
+        private bool IsClusterWithoutEnoughElements(int minAmountOfElementsInCluster)
         {
-            base.EStep();
-        }
-
-        protected override void MStep()
-        {
-            base.MStep();
-        }
-
-        protected override void SetUpLabels()
-        {
-            base.SetUpLabels();
-            //TempClusters = new double[AmountOfClusters][];
-            //for (int i = 0; i < AmountOfClusters; i++)
-            //{
-            //    var list = new List<double>();
-            //    for (int j = 0; j < AmountOfElements; j++)
-            //    {
-            //        if (Labels[j] == i)
-            //            list.Add(DataSetValues[j]);
-            //    }
-
-            //    TempClusters[i] = list.ToArray();
-            //}
-        }
-
-        protected override double[] CountAverage()
-        {
-            return base.CountAverage();
-            var averages = new double[AmountOfClusters];
-            for (int i = 0; i < AmountOfClusters; i++)
+            for (var i = 0; i < AmountOfClusters; i++)
             {
-                averages[i] = TempClusters[i].Average();
+                var amountOfElementsInCluster = Labels.Count(l => l == i);
+                if (amountOfElementsInCluster < minAmountOfElementsInCluster)
+                    return true;
             }
-            return averages;
-        }
 
-        protected override double[] CountDispersion(double[] averages)
-        {
-            return base.CountDispersion(averages);
-            var dispersions = new double[AmountOfClusters];
-            for (int i = 0; i < AmountOfClusters; i++)
-            {
-                double sum = 0;
-                TempClusters[i].ToList()
-                    .ForEach(e => sum += Math.Pow(e - averages[i], 2));
-                dispersions[i] = sum / TempClusters[i].Length;
-            }
-            return dispersions;
-        }
-
-        protected override double[] CountProbabilitiesToBeInCluster()
-        {
-            return base.CountProbabilitiesToBeInCluster();
-            //var probabilities = new double[AmountOfClusters];
-            //for (int i = 0; i < AmountOfClusters; i++)
-            //    probabilities[i] = 1.0 * TempClusters[i].Length / AmountOfElements;
-            //return probabilities;
+            return false;
         }
     }
 }

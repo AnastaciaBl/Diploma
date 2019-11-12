@@ -38,6 +38,7 @@ namespace Diploma.Presentation
             legendStyle.Setters.Add(new Setter(WidthProperty, 0.0));
             legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
             AllPatientsChart.LegendStyle = legendStyle;
+            OneAttributeBarChart.LegendStyle = legendStyle;
             PcaChart.LegendStyle = legendStyle;
         }
 
@@ -142,9 +143,9 @@ namespace Diploma.Presentation
             }
             algorithm.SplitOnClusters();
             var labels = algorithm.Labels;
-            HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, amountOfClusters);
+            HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, algorithm.AmountOfClusters);
             FillBarChart(data, amountOfClasses);
-            SetProbabilityDensityOnBarChart(data, algorithm.HiddenVector, amountOfClusters, labels);
+            SetProbabilityDensityOnBarChart(data, algorithm.HiddenVector, algorithm.AmountOfClusters, labels);
         }
 
         private double[] GetDataOfAttribute(int index)
