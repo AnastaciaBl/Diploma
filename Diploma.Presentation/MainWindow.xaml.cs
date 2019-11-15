@@ -14,6 +14,7 @@ using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Diploma.Algorithms.AgglomerativeHierarchic;
 using Diploma.Algorithms.PCA;
 
 namespace Diploma.Presentation
@@ -217,6 +218,10 @@ namespace Diploma.Presentation
 
             AllPatientsChart.Series.Clear();
             FillChartAfterKMeansAlgorithm(kMeans, AllPatientsChart);
+
+            //!!!
+            var algH = new AgglomerativeHierarchic(AttributeMatrix, Constant.AMOUNT_OF_ATTRIBUTES, AmountOfPatients);
+            algH.SplitOnClusters();
         }
 
         public void FillChartAfterKMeansAlgorithm(KMeansAlgorithm kMeans, Chart chart)

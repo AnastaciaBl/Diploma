@@ -157,6 +157,15 @@
                         <charts:Chart Grid.Column="1" Name="PcaChart"/>
                     </Grid>
                 </TabItem>
+                <TabItem Header="Hierarchic">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.3*"/>
+                            <ColumnDefinition Width="0.7*"/>
+                        </Grid.ColumnDefinitions>
+
+                    </Grid>
+                </TabItem>
             </TabControl>
         </Grid>
     </Grid>
