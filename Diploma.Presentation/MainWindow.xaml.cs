@@ -15,6 +15,7 @@ using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Diploma.Algorithms.AgglomerativeHierarchic;
+using Diploma.Algorithms.Criterion;
 using Diploma.Algorithms.PCA;
 
 namespace Diploma.Presentation
@@ -131,18 +132,18 @@ namespace Diploma.Presentation
             int amountOfClasses = int.TryParse(AmountOfClassesTb.Text, out amountOfClasses) ? amountOfClasses : 0;
             EMAlgorithm algorithm = null;
             var distribution = new NormalDistribution();
-            var eps = 0.00001;
+            var eps = Constant.EPS;
 
             switch (AlgorithmCb.SelectedIndex)
             {
                 case 0:
-                    algorithm = new EMAlgorithm(amountOfClusters, distribution, data.ToList(), eps);
+                    algorithm = new EMAlgorithm(distribution, data.ToList(), eps);
                     break;
                 case 1:
-                    algorithm = new SEMAlgorithm(amountOfClusters, distribution, data.ToList(), eps);
+                    algorithm = new SEMAlgorithm(distribution, data.ToList(), eps, true);
                     break;
             }
-            algorithm.SplitOnClusters();
+            algorithm.SplitOnClusters(amountOfClusters);
             var labels = algorithm.Labels;
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, algorithm.AmountOfClusters);
             FillBarChart(data, amountOfClasses);
@@ -335,6 +336,8 @@ namespace Diploma.Presentation
                 FillDataToElements();
                 FillAllPatientsChart();
                 LearnPca();
+
+                CountBicCriteria();
             }
         }
 
@@ -368,6 +371,80 @@ namespace Diploma.Presentation
             PcaChart.Series.Clear();
 
             FillChartAfterKMeansAlgorithm(kMeans, PcaChart);
+        }
+
+        private void CountBicCriteria()
+        {
+            var bicEMList = new List<BICViewModel>();
+            var bicSEMList = new List<BICViewModel>();
+            var bicSEMAutoCounter = new List<BICViewModel>();
+            var amountOfClusters = 1;
+            var distribution = new NormalDistribution();
+            for (var i = 0; i < Constant.AMOUNT_OF_ATTRIBUTES; i++)
+            {
+                var em = new EMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS);
+                em.SplitOnClusters(amountOfClusters);
+
+                var bic = BIC.Count(distribution, 2 * amountOfClusters, em.DataSetValues[0], em.AmountOfElements,
+                    em.HiddenVector[em.Labels[0]].MStruct, em.HiddenVector[em.Labels[0]].GStruct);
+                bicEMList.Add(new BICViewModel()
+                {
+                    BIC = bic,
+                    ClusterAmount = amountOfClusters,
+                    Component = i
+                });
+
+                var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS, false);
+                sem.SplitOnClusters(amountOfClusters);
+
+                bic = BIC.Count(distribution, 2 * amountOfClusters, sem.DataSetValues[0], sem.AmountOfElements,
+                    sem.HiddenVector[sem.Labels[0]].MStruct, sem.HiddenVector[sem.Labels[0]].GStruct);
+                bicSEMList.Add(new BICViewModel()
+                {
+                    BIC = bic,
+                    ClusterAmount = amountOfClusters,
+                    Component = i
+                });
+
+                amountOfClusters++;
+
+                em.SplitOnClusters(amountOfClusters);
+
+                bic = BIC.Count(distribution, 2 * amountOfClusters, em.DataSetValues[0], em.AmountOfElements,
+                    em.HiddenVector[em.Labels[0]].MStruct, em.HiddenVector[em.Labels[0]].GStruct);
+                bicEMList.Add(new BICViewModel()
+                {
+                    BIC = bic,
+                    ClusterAmount = amountOfClusters,
+                    Component = i
+                });
+
+                sem.SplitOnClusters(amountOfClusters);
+
+                bic = BIC.Count(distribution, 2 * amountOfClusters, sem.DataSetValues[0], sem.AmountOfElements,
+                    sem.HiddenVector[sem.Labels[0]].MStruct, sem.HiddenVector[sem.Labels[0]].GStruct);
+                bicSEMList.Add(new BICViewModel()
+                {
+                    BIC = bic,
+                    ClusterAmount = amountOfClusters,
+                    Component = i
+                });
+
+                amountOfClusters = 1;
+
+                var semAuto = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS, true);
+                semAuto.SplitOnClusters(amountOfClusters + 2);
+                bicSEMAutoCounter.Add(new BICViewModel()
+                {
+                    BIC = bic,
+                    ClusterAmount = semAuto.AmountOfClusters,
+                    Component = i
+                });
+            }
+
+            BicEm.ItemsSource = bicEMList;
+            BicSem.ItemsSource = bicSEMList;
+            BicSemAuto.ItemsSource = bicSEMAutoCounter;
         }
     }
 }

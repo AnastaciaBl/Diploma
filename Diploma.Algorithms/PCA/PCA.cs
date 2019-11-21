@@ -1,4 +1,5 @@
 ﻿using Accord.Statistics.Analysis;
+using Diploma.Model;
 
 namespace Diploma.Algorithms.PCA
 {
@@ -39,6 +40,15 @@ namespace Diploma.Algorithms.PCA
                 EigenValues[i] = Pca.Components[i].Eigenvalue;
                 SingularValues[i] = Pca.Components[i].SingularValue;
             }
+        }
+
+        public double[] GetVecorByIndex(int index)
+        {
+            var data = new double[Constant.AMOUNT_OF_ATTRIBUTES];
+            for (var i = 0; i < data.Length; i++)
+                data[i] = ProjectionSet[index][i];
+
+            return data;
         }
     }
 }

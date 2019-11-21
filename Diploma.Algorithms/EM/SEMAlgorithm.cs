@@ -7,38 +7,51 @@ namespace Diploma.Algorithms.EM
 {
     public class SEMAlgorithm: EMAlgorithm
     {
-        private double[][] TempClusters { get; set; }
         private readonly int THRESHOLD_COEFFICIENT;
+        private readonly bool IS_AUTO_CLUSTER_AMOUNT_COUNTER;
 
-        public SEMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps) : base(
-            amountOfClusters, distribution, values, eps)
+        public SEMAlgorithm(IDistribution distribution, List<double> values, double eps, bool isCountClusterAmount) : base(
+            distribution, values, eps)
         {
-            THRESHOLD_COEFFICIENT = Convert.ToInt32(AmountOfElements * 0.05);
+            THRESHOLD_COEFFICIENT = Convert.ToInt32(AmountOfElements * 0.1);
+            IS_AUTO_CLUSTER_AMOUNT_COUNTER = isCountClusterAmount;
         }
 
-        public override void SplitOnClusters()
+        public override void SplitOnClusters(int amountOfClusters)
         {
-            Random random = new Random();
-            FillProbabilityMatrixByRandomValues(random);
-            var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
-            var index = 0;
-            do
+            try
             {
-                Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
-                SStep(random);
-                MStep();
-                EStep();
-                index++;
-            } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 500));
+                AmountOfClusters = amountOfClusters;
+                Probabilities = new double[AmountOfElements, AmountOfClusters];
 
-            if (IsClusterWithoutEnoughElements(THRESHOLD_COEFFICIENT))
-            {
-                AmountOfClusters--;
-                SplitOnClusters();
+                Random random = new Random();
+                FillProbabilityMatrixByRandomValues(random);
+                var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
+                var index = 0;
+                do
+                {
+                    Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
+                    SStep(random);
+                    MStep();
+                    EStep();
+                    index++;
+                } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 500));
+
+                if (IsClusterWithoutEnoughElements(THRESHOLD_COEFFICIENT) && IS_AUTO_CLUSTER_AMOUNT_COUNTER)
+                {
+                    SplitOnClusters(amountOfClusters - 1);
+                }
+                else
+                {
+                    SetUpLabels();
+                }
+
+                if (Labels.First() == -1 || Double.IsNaN(HiddenVector.First().MStruct))
+                    SplitOnClusters(amountOfClusters);
             }
-            else
+            catch
             {
-                SetUpLabels();
+                SplitOnClusters(amountOfClusters);
             }
         }
 

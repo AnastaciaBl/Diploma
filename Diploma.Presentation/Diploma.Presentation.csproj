@@ -72,6 +72,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\BICViewModel.cs" />
     <Compile Include="Models\HiddenVectorViewModel.cs" />
     <Compile Include="Models\PatientViewModel.cs" />
     <Compile Include="Models\PcaViewModel.cs" />

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Diploma.Algorithms.EM
 {
@@ -16,31 +17,43 @@ namespace Diploma.Algorithms.EM
         protected double[,] Probabilities { get; set; }
         public List<Parameters> HiddenVector { get; protected set; }
 
-        public EMAlgorithm(int amountOfClusters, IDistribution distribution, List<double> values, double eps)
+        public EMAlgorithm(IDistribution distribution, List<double> values, double eps)
         {
-            AmountOfClusters = amountOfClusters;
             AmountOfElements = values.Count;
             Distribution = distribution;
             DataSetValues = values;
             Labels = new int[values.Count];
             Eps = eps;
-            Probabilities = new double[AmountOfElements, AmountOfClusters];
         }
 
-        public virtual void SplitOnClusters()
+        public virtual void SplitOnClusters(int amountOfClusters)
         {
-            Random random = new Random(2);
-            FillProbabilityMatrixByRandomValues(random);
-            var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
-            var index = 0;
-            do
+            try
             {
-                Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
-                MStep();
-                EStep();
-                index++;
-            } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps && (index < 500));
-            SetUpLabels();
+                AmountOfClusters = amountOfClusters;
+                Probabilities = new double[AmountOfElements, AmountOfClusters];
+
+                Random random = new Random(2);
+                FillProbabilityMatrixByRandomValues(random);
+                var oldProbabilitiesMatrix = new double[AmountOfElements, AmountOfClusters];
+                var index = 0;
+                do
+                {
+                    Array.Copy(Probabilities, oldProbabilitiesMatrix, AmountOfClusters * AmountOfElements);
+                    MStep();
+                    EStep();
+                    index++;
+                } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps && (index < 500));
+
+                SetUpLabels();
+
+                if (Labels.First() == -1 || Double.IsNaN(HiddenVector.First().MStruct))
+                    SplitOnClusters(amountOfClusters);
+            }
+            catch
+            {
+                SplitOnClusters(amountOfClusters);
+            }
         }
 
         protected void FillProbabilityMatrixByRandomValues(Random random)

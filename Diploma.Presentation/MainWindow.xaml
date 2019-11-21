@@ -166,6 +166,26 @@
 
                     </Grid>
                 </TabItem>
+                <TabItem Header="Statistic">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <DataGrid Name="BicEm" Grid.Row="0"/>
+                            <DataGrid Name="BicSem" Grid.Row="1"/>
+                            <DataGrid Name="BicSemAuto" Grid.Row="2"/>
+                        </Grid>
+                    </Grid>
+                </TabItem>
             </TabControl>
         </Grid>
     </Grid>
