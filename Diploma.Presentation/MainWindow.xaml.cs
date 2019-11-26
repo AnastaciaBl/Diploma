@@ -97,6 +97,12 @@ namespace Diploma.Presentation
 
             AlgorithmCb.ItemsSource = new List<string>{ "EM", "SEM"};
             AlgorithmCb.SelectedIndex = 0;
+
+            AttributeHierFirstCb.ItemsSource = attributes;
+            AttributeHierFirstCb.SelectedIndex = 0;
+
+            AttributeHierSecondCb.ItemsSource = attributes;
+            AttributeHierSecondCb.SelectedIndex = 1;
         }
 
         public void FillAllPatientsChart()
@@ -219,10 +225,6 @@ namespace Diploma.Presentation
 
             AllPatientsChart.Series.Clear();
             FillChartAfterKMeansAlgorithm(kMeans, AllPatientsChart);
-
-            //!!!
-            var algH = new AgglomerativeHierarchic(AttributeMatrix, Constant.AMOUNT_OF_ATTRIBUTES, AmountOfPatients);
-            algH.SplitOnClusters();
         }
 
         public void FillChartAfterKMeansAlgorithm(KMeansAlgorithm kMeans, Chart chart)
@@ -445,6 +447,53 @@ namespace Diploma.Presentation
             BicEm.ItemsSource = bicEMList;
             BicSem.ItemsSource = bicSEMList;
             BicSemAuto.ItemsSource = bicSEMAutoCounter;
+        }
+
+        private void FillHierarchicChart(int[] labels, double[] firstAttributes, double[] secondAttributes, int amountOfClusters)
+        {
+            for (var i = 0; i < amountOfClusters; i++)
+            {
+                var points = new PointCollection();
+                for (var j = 0; j < labels.Length; j++)
+                {
+                    if(labels[j] == i)
+                        points.Add(new Point(firstAttributes[j], secondAttributes[j]));
+                }
+
+                var series = new ScatterSeries()
+                {
+                    Name = $"{i+1} cluster",
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y",
+                    ItemsSource = points
+                };
+
+                HierarchicChart.Series.Add(series);
+            }
+        }
+
+        private void HierarchicBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            HierarchicChart.Series.Clear();
+
+            int amountOfClusters = int.TryParse(ClusterAmountHierarchicTb.Text, out amountOfClusters) ? amountOfClusters : 2;
+            var firstAttributeIndex = AttributeHierFirstCb.SelectedIndex;
+            var secondAttributeIndex = AttributeHierSecondCb.SelectedIndex;
+
+            var dataF = GetDataOfAttribute(firstAttributeIndex);
+            var dataS = GetDataOfAttribute(secondAttributeIndex);
+
+            //two-dimensional data
+            var data = new double[AmountOfPatients][];
+            for (var i = 0; i < AmountOfPatients; i++)
+            {
+                data[i] = new double[2] {dataF[i], dataS[i]};
+            }
+
+            var alg = new AgglomerativeHierarchic(data, 2, AmountOfPatients);
+            alg.SplitOnClusters();
+
+            FillHierarchicChart(alg.Clusters[amountOfClusters - 1].ToArray(), dataF, dataS, amountOfClusters);
         }
     }
 }

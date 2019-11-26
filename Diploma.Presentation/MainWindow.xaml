@@ -123,7 +123,7 @@
                                 <ComboBox Name="AlgorithmCb" Grid.Row="1" Grid.Column="0" Margin="5,1,5,5"/>
                                 <Button Name="SplitOneAttribute" Grid.Row="1" Grid.Column="1" Margin="5,1,5,5" Content="Split on clusters"  Click="SplitOneAttribute_OnClick"/>
                             </Grid>
-                            
+
                             <DataGrid Name="HiddenVectorDG"  Grid.Row="3" Margin="5,5,5,5"/>
                         </Grid>
 
@@ -153,7 +153,7 @@
                             <Button Name="KMeansForPcaBtn" Grid.Row="0" Content="Split on clusters" Margin="5,5,5,5" Width="110" HorizontalAlignment="Right" Click="KMeansForPcaBtn_OnClick"/>
                             <DataGrid Grid.Row="1" Name="PcaParametersDg"/>
                         </Grid>
-                        
+
                         <charts:Chart Grid.Column="1" Name="PcaChart"/>
                     </Grid>
                 </TabItem>
@@ -164,6 +164,33 @@
                             <ColumnDefinition Width="0.7*"/>
                         </Grid.ColumnDefinitions>
 
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="44*"/>
+                                <ColumnDefinition Width="75*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.7*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0" Content="Amount of clusters:" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
+                            <TextBox Name="ClusterAmountHierarchicTb" Grid.Row="0" Text="2" TextAlignment="Center" HorizontalAlignment="Right" Width="100" Margin="0,5,5,5" Grid.Column="1"/>
+
+                            <ComboBox Name="AttributeHierFirstCb"  Grid.Row="1" Width="100" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
+                            <ComboBox Name="AttributeHierSecondCb" Grid.Row="1" Width="100" HorizontalAlignment="Right" Margin="0,5,5,5" Grid.Column="1"/>
+
+                            <Button Name="HierarchicBtn" Grid.Row="2" Content="Split" Margin="5,5,5,5" Click="HierarchicBtn_OnClick" Grid.ColumnSpan="2"/>
+                        </Grid>
+
+                        <charts:Chart Name="HierarchicChart" Grid.Column="1">
+                            <charts:Chart.Axes>
+                                <charts:LinearAxis Orientation="X" Minimum="0"/>
+                                <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
+                            </charts:Chart.Axes>
+                        </charts:Chart>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Statistic">
@@ -172,7 +199,7 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <Grid Grid.Column="0">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
