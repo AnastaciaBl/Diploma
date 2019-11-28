@@ -462,7 +462,7 @@ namespace Diploma.Presentation
 
                 var series = new ScatterSeries()
                 {
-                    Name = $"{i+1} cluster",
+                    Title = $"{i+1} cluster",
                     IndependentValuePath = "X",
                     DependentValuePath = "Y",
                     ItemsSource = points
@@ -474,6 +474,9 @@ namespace Diploma.Presentation
 
         private void HierarchicBtn_OnClick(object sender, RoutedEventArgs e)
         {
+            //var hAlg = new AgglomerativeHierarchicAglomera(Patients, AttributeMatrix, AmountOfPatients);
+            //hAlg.SplitOnClusters();
+
             HierarchicChart.Series.Clear();
 
             int amountOfClusters = int.TryParse(ClusterAmountHierarchicTb.Text, out amountOfClusters) ? amountOfClusters : 2;
