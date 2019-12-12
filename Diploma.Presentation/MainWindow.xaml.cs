@@ -342,8 +342,6 @@ namespace Diploma.Presentation
                 FillDataToElements();
                 FillAllPatientsChart();
                 LearnPca();
-
-                CountBicCriteria();
             }
         }
 
@@ -379,17 +377,16 @@ namespace Diploma.Presentation
             FillChartAfterKMeansAlgorithm(kMeans, PcaChart);
         }
 
-        private void CountBicCriteria()
+        private void CountBicCriteria(List<int> indexesOfMeaningfullParameters)
         {
             var bicEMList = new List<BICViewModel>();
             var bicSEMList = new List<BICViewModel>();
-            var bicSEMAutoCounter = new List<BICViewModel>();
             var amountOfClusters = 1;
             var paramAmount = 3;
             var distribution = new NormalDistribution();
-            for (var i = 0; i < Constant.AMOUNT_OF_ATTRIBUTES; i++)
+            for (var i = 0; i < indexesOfMeaningfullParameters.Count; i++)
             {
-                var em = new EMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS);
+                var em = new EMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS);
                 em.SplitOnClusters(amountOfClusters);
 
                 var bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
@@ -400,7 +397,7 @@ namespace Diploma.Presentation
                     Component = i
                 });
 
-                var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS, false);
+                var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS, false);
                 sem.SplitOnClusters(amountOfClusters);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
@@ -434,20 +431,10 @@ namespace Diploma.Presentation
                 });
 
                 amountOfClusters = 1;
-
-                var semAuto = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS, true);
-                semAuto.SplitOnClusters(amountOfClusters + 2);
-                bicSEMAutoCounter.Add(new BICViewModel()
-                {
-                    BIC = bic,
-                    ClusterAmount = semAuto.AmountOfClusters,
-                    Component = i
-                });
             }
 
             BicEm.ItemsSource = bicEMList;
             BicSem.ItemsSource = bicSEMList;
-            BicSemAuto.ItemsSource = bicSEMAutoCounter;
         }
 
         private void FillHierarchicChart(int[] labels, double[] firstAttributes, double[] secondAttributes, int amountOfClusters)
@@ -502,14 +489,48 @@ namespace Diploma.Presentation
 
         private void CountBicBtn_OnClick(object sender, RoutedEventArgs e)
         {
+            List<int> indexList = null;
             switch (ComponentsPickOutCb.SelectedIndex)
             {
                 case 0:
+                    indexList = GetMeaningfullIndexesByEigenValueCriteria();
+                    CountBicCriteria(indexList);
                     break;
                 case 1:
+                    double dispersionSum = double.TryParse(DispersionSumTb.Text, out dispersionSum) ? dispersionSum : 80;
+                    indexList = GetMeaningfullIndexesBySumOfDispersionCriteria(dispersionSum);
+                    CountBicCriteria(indexList);
                     break;
             }
-            throw new NotImplementedException();
+        }
+
+        private List<int> GetMeaningfullIndexesByEigenValueCriteria(double eigenValue = 1)
+        {
+            var indexList = new List<int>();
+            for (var i = 0; i < PcaResult.AmountOfComponents; i++)
+            {
+                if (PcaResult.EigenValues[i] > eigenValue)
+                    indexList.Add(i);
+            }
+
+            return indexList;
+        }
+
+        private List<int> GetMeaningfullIndexesBySumOfDispersionCriteria(double dispersionSum)
+        {
+            var indexList = new List<int>();
+            double sum = 0;
+            for (var i = 0; i < PcaResult.AmountOfComponents; i++)
+            {
+                if (PcaResult.CumulativeProportion[i] * 100 < dispersionSum)
+                    indexList.Add(i);
+                else
+                {
+                    break;
+                }
+            }
+
+            return indexList;
         }
 
         private void ComponentsPickOutCb_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
