@@ -202,14 +202,29 @@
 
                         <Grid Grid.Column="0">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
+                                <RowDefinition Height="0.2*"/>
+                                <RowDefinition Height="0.3*"/>
+                                <RowDefinition Height="0.3*"/>
+                                <RowDefinition Height="0.3*"/>
                             </Grid.RowDefinitions>
 
-                            <DataGrid Name="BicEm" Grid.Row="0"/>
-                            <DataGrid Name="BicSem" Grid.Row="1"/>
-                            <DataGrid Name="BicSemAuto" Grid.Row="2"/>
+                            <Grid Grid.Row="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <Label Grid.Row="0" Content="Pick out significant components:" HorizontalAlignment="Left" Margin="5,5,5,5"/>
+                                <ComboBox Name="ComponentsPickOutCb" Grid.Row="0" Width="200" HorizontalAlignment="Right" Margin="5,5,5,5" SelectionChanged="ComponentsPickOutCb_OnSelectionChanged"/>
+
+                                <Label Grid.Row="1" Content="Amount of sum, %:" HorizontalAlignment="Left" Margin="5,5,5,5"/>
+                                <TextBox Name="DispersionSumTb" Grid.Row="1" IsEnabled="False" Width="100" HorizontalAlignment="Left" Margin="115,5,5,5"/>
+                                <Button Name="CountBicBtn" Content="Apply" Grid.Row="1" Width="150" HorizontalAlignment="Right" Margin="5,5,20,5" Click="CountBicBtn_OnClick"/>
+                            </Grid>
+
+                            <DataGrid Name="BicEm" Grid.Row="1"/>
+                            <DataGrid Name="BicSem" Grid.Row="2"/>
+                            <DataGrid Name="BicSemAuto" Grid.Row="3"/>
                         </Grid>
                     </Grid>
                 </TabItem>

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
@@ -103,6 +104,9 @@ namespace Diploma.Presentation
 
             AttributeHierSecondCb.ItemsSource = attributes;
             AttributeHierSecondCb.SelectedIndex = 1;
+
+            ComponentsPickOutCb.ItemsSource = new List<string> {"Eigen value < 1", "Sum of dispersion"};
+            ComponentsPickOutCb.SelectedIndex = 0;
         }
 
         public void FillAllPatientsChart()
@@ -381,14 +385,14 @@ namespace Diploma.Presentation
             var bicSEMList = new List<BICViewModel>();
             var bicSEMAutoCounter = new List<BICViewModel>();
             var amountOfClusters = 1;
+            var paramAmount = 3;
             var distribution = new NormalDistribution();
             for (var i = 0; i < Constant.AMOUNT_OF_ATTRIBUTES; i++)
             {
                 var em = new EMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS);
                 em.SplitOnClusters(amountOfClusters);
 
-                var bic = BIC.Count(distribution, 2 * amountOfClusters, em.DataSetValues[0], em.AmountOfElements,
-                    em.HiddenVector[em.Labels[0]].MStruct, em.HiddenVector[em.Labels[0]].GStruct);
+                var bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
                 bicEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
@@ -399,8 +403,7 @@ namespace Diploma.Presentation
                 var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(i).ToList(), Constant.EPS, false);
                 sem.SplitOnClusters(amountOfClusters);
 
-                bic = BIC.Count(distribution, 2 * amountOfClusters, sem.DataSetValues[0], sem.AmountOfElements,
-                    sem.HiddenVector[sem.Labels[0]].MStruct, sem.HiddenVector[sem.Labels[0]].GStruct);
+                bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
                 bicSEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
@@ -412,8 +415,7 @@ namespace Diploma.Presentation
 
                 em.SplitOnClusters(amountOfClusters);
 
-                bic = BIC.Count(distribution, 2 * amountOfClusters, em.DataSetValues[0], em.AmountOfElements,
-                    em.HiddenVector[em.Labels[0]].MStruct, em.HiddenVector[em.Labels[0]].GStruct);
+                bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
                 bicEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
@@ -423,8 +425,7 @@ namespace Diploma.Presentation
 
                 sem.SplitOnClusters(amountOfClusters);
 
-                bic = BIC.Count(distribution, 2 * amountOfClusters, sem.DataSetValues[0], sem.AmountOfElements,
-                    sem.HiddenVector[sem.Labels[0]].MStruct, sem.HiddenVector[sem.Labels[0]].GStruct);
+                bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
                 bicSEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
@@ -497,6 +498,32 @@ namespace Diploma.Presentation
             alg.SplitOnClusters();
 
             FillHierarchicChart(alg.Clusters[amountOfClusters - 1].ToArray(), dataF, dataS, amountOfClusters);
+        }
+
+        private void CountBicBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            switch (ComponentsPickOutCb.SelectedIndex)
+            {
+                case 0:
+                    break;
+                case 1:
+                    break;
+            }
+            throw new NotImplementedException();
+        }
+
+        private void ComponentsPickOutCb_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ComponentsPickOutCb.SelectedIndex == 0)
+            {
+                DispersionSumTb.IsEnabled = false;
+                DispersionSumTb.Text = string.Empty;
+            }
+            else
+            {
+                DispersionSumTb.IsEnabled = true;
+                DispersionSumTb.Text = "80";
+            }
         }
     }
 }
