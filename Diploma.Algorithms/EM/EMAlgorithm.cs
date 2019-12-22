@@ -1,6 +1,7 @@
 ﻿using Diploma.Algorithms.Distribution;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -8,6 +9,7 @@ namespace Diploma.Algorithms.EM
 {
     public class EMAlgorithm
     {
+        public int Counter = 0;
         public int AmountOfClusters { get; protected set; }
         public int AmountOfElements { get; }
         public readonly IDistribution Distribution;
@@ -26,7 +28,7 @@ namespace Diploma.Algorithms.EM
             Eps = eps;
         }
 
-        public virtual void SplitOnClusters(int amountOfClusters)
+        public virtual void SplitOnClusters(int amountOfClusters, int maxAmountOfSteps)
         {
             try
             {
@@ -43,16 +45,16 @@ namespace Diploma.Algorithms.EM
                     MStep();
                     EStep();
                     index++;
-                } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps && (index < 500));
+                } while (CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps && (index < maxAmountOfSteps));
 
                 SetUpLabels();
 
                 if (Labels.First() == -1 || Double.IsNaN(HiddenVector.First().MStruct))
-                    SplitOnClusters(amountOfClusters);
+                    SplitOnClusters(amountOfClusters, maxAmountOfSteps);
             }
             catch
             {
-                SplitOnClusters(amountOfClusters);
+                SplitOnClusters(amountOfClusters, maxAmountOfSteps);
             }
         }
 

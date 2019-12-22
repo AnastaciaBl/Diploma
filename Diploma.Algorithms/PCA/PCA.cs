@@ -1,5 +1,8 @@
-﻿using Accord.Statistics.Analysis;
+﻿using Accord.Statistics;
+using Accord.Statistics.Analysis;
 using Diploma.Model;
+using System;
+using System.Collections.Generic;
 
 namespace Diploma.Algorithms.PCA
 {
@@ -18,7 +21,8 @@ namespace Diploma.Algorithms.PCA
         public PCA(double[][] data)
         {
             DataSet = data;
-            Pca = new PrincipalComponentAnalysis(PrincipalComponentMethod.Center);
+            Pca = new PrincipalComponentAnalysis(PrincipalComponentMethod.Standardize);
+            //PrincipalComponentMethod.CovarianceMatrix
         }
 
         public void CreateComponents()
@@ -49,6 +53,45 @@ namespace Diploma.Algorithms.PCA
                 data[i] = ProjectionSet[index][i];
 
             return data;
+        }
+
+        public int[][] GetValuableParameterIndexes(List<int> valuableComponentIndexes, int amountOfObservations)
+        {
+            var coefficient = 0.5;
+            var matrix = new int[valuableComponentIndexes.Count][];
+            for (var i = 0; i < valuableComponentIndexes.Count; i++)
+            {
+                var indexes = new List<int>();
+                for (var j = 0; j < Constant.AMOUNT_OF_ATTRIBUTES; j++)
+                {
+                    var array = GetArrayForCorrelationAnalysis(amountOfObservations, j, valuableComponentIndexes[i]);
+                    if (CountCorrelation(array) > coefficient)
+                    {
+                        indexes.Add(j);
+                    }
+                }
+                matrix[i] = indexes.ToArray();
+            }
+
+            return matrix;
+        }
+
+        private double[,] GetArrayForCorrelationAnalysis(int amountOfObservations, int parameterIndex, int componentIndex)
+        {
+            var array = new double[amountOfObservations, 2];
+            for (var i = 0; i < amountOfObservations; i++)
+            {
+                array[i, 0] = DataSet[i][parameterIndex];
+                array[i, 1] = ProjectionSet[i][componentIndex];
+            }
+
+            return array;
+        }
+
+        private double CountCorrelation(double[,] array)
+        {
+            var matrix = Measures.Correlation(array);
+            return Math.Abs(matrix[0, 1]);
         }
     }
 }

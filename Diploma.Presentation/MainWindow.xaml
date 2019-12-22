@@ -226,6 +226,13 @@
                             <DataGrid Name="BicSem" Grid.Row="2"/>
                             <DataGrid Name="BicSemAuto" Grid.Row="3"/>
                         </Grid>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <DataGrid Name="ValuableParametersDg" Grid.Row="0"/>
+                        </Grid>
                     </Grid>
                 </TabItem>
             </TabControl>

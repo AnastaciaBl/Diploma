@@ -136,6 +136,7 @@ namespace Diploma.Presentation
 
         private void SplitOneAttribute_OnClick(object sender, RoutedEventArgs e)
         {
+            var maxAmountOfSteps = 100;
             var indexOfAttribute = AttributesCB.SelectedIndex;
             var data = GetDataOfAttribute(indexOfAttribute);
             int amountOfClusters = int.TryParse(AmountOfClustersTb.Text, out amountOfClusters) ? amountOfClusters : 2;
@@ -153,7 +154,7 @@ namespace Diploma.Presentation
                     algorithm = new SEMAlgorithm(distribution, data.ToList(), eps, true);
                     break;
             }
-            algorithm.SplitOnClusters(amountOfClusters);
+            algorithm.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
             var labels = algorithm.Labels;
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, algorithm.AmountOfClusters);
             FillBarChart(data, amountOfClasses);
@@ -383,51 +384,52 @@ namespace Diploma.Presentation
             var bicSEMList = new List<BICViewModel>();
             var amountOfClusters = 1;
             var paramAmount = 3;
+            var maxAmountOfSteps = 30;
             var distribution = new NormalDistribution();
             for (var i = 0; i < indexesOfMeaningfullParameters.Count; i++)
             {
                 var em = new EMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS);
-                em.SplitOnClusters(amountOfClusters);
+                em.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 var bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
                 bicEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
                     ClusterAmount = amountOfClusters,
-                    Component = i
+                    Component = indexesOfMeaningfullParameters[i]
                 });
 
                 var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS, false);
-                sem.SplitOnClusters(amountOfClusters);
+                sem.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
                 bicSEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
                     ClusterAmount = amountOfClusters,
-                    Component = i
+                    Component = indexesOfMeaningfullParameters[i]
                 });
 
                 amountOfClusters++;
 
-                em.SplitOnClusters(amountOfClusters);
+                em.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
                 bicEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
                     ClusterAmount = amountOfClusters,
-                    Component = i
+                    Component = indexesOfMeaningfullParameters[i]
                 });
 
-                sem.SplitOnClusters(amountOfClusters);
+                sem.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
                 bicSEMList.Add(new BICViewModel()
                 {
                     BIC = bic,
                     ClusterAmount = amountOfClusters,
-                    Component = i
+                    Component = indexesOfMeaningfullParameters[i]
                 });
 
                 amountOfClusters = 1;
@@ -494,14 +496,50 @@ namespace Diploma.Presentation
             {
                 case 0:
                     indexList = GetMeaningfullIndexesByEigenValueCriteria();
-                    CountBicCriteria(indexList);
                     break;
                 case 1:
                     double dispersionSum = double.TryParse(DispersionSumTb.Text, out dispersionSum) ? dispersionSum : 80;
                     indexList = GetMeaningfullIndexesBySumOfDispersionCriteria(dispersionSum);
-                    CountBicCriteria(indexList);
                     break;
             }
+
+            CountBicCriteria(indexList);
+            CountAndPrintAutoSem(indexList);
+            var valuableParameterIndexes = PcaResult.GetValuableParameterIndexes(indexList, Patients.Count);
+            var uniqueIndexes = ValuableParametersViewModel.GetUniqueIndexes(valuableParameterIndexes, indexList.Count);
+            var vIndexVm = new List<ValuableParametersViewModel>();
+            foreach (var index in uniqueIndexes)
+            {
+                vIndexVm.Add(new ValuableParametersViewModel()
+                {
+                    Index = index,
+                    Title = AttributesCB.Items[index].ToString()
+                });
+            }
+
+            ValuableParametersDg.ItemsSource = vIndexVm;
+        }
+
+        private void CountAndPrintAutoSem(List<int> indexesOfMeaningfullParameters)
+        {
+            var maxAmountOfSteps = 100;
+            var distribution = new NormalDistribution();
+            var amountOfClusters = 5;
+            var results = new List<AutoSemViewModel>();
+            for (var i = 0; i < indexesOfMeaningfullParameters.Count; i++)
+            {
+                var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS, true);
+                sem.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
+                results.Add(new AutoSemViewModel()
+                {
+                    Component = indexesOfMeaningfullParameters[i],
+                    AmountOfClusters = amountOfClusters,
+                    ThresholdCoefficient = Math.Round(sem.THRESHOLD_COEFFICIENT * 1.0 / sem.AmountOfElements , 2),
+                    AutoAmountOfClusters = sem.AmountOfClusters
+                }); 
+            }
+
+            BicSemAuto.ItemsSource = results;
         }
 
         private List<int> GetMeaningfullIndexesByEigenValueCriteria(double eigenValue = 1)
@@ -519,7 +557,6 @@ namespace Diploma.Presentation
         private List<int> GetMeaningfullIndexesBySumOfDispersionCriteria(double dispersionSum)
         {
             var indexList = new List<int>();
-            double sum = 0;
             for (var i = 0; i < PcaResult.AmountOfComponents; i++)
             {
                 if (PcaResult.CumulativeProportion[i] * 100 < dispersionSum)

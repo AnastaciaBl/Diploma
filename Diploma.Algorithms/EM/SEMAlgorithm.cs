@@ -7,17 +7,17 @@ namespace Diploma.Algorithms.EM
 {
     public class SEMAlgorithm: EMAlgorithm
     {
-        private readonly int THRESHOLD_COEFFICIENT;
+        public readonly int THRESHOLD_COEFFICIENT;
         private readonly bool IS_AUTO_CLUSTER_AMOUNT_COUNTER;
 
         public SEMAlgorithm(IDistribution distribution, List<double> values, double eps, bool isCountClusterAmount) : base(
             distribution, values, eps)
         {
-            THRESHOLD_COEFFICIENT = Convert.ToInt32(AmountOfElements * 0.1);
+            THRESHOLD_COEFFICIENT = Convert.ToInt32(AmountOfElements * 0.15);
             IS_AUTO_CLUSTER_AMOUNT_COUNTER = isCountClusterAmount;
         }
 
-        public override void SplitOnClusters(int amountOfClusters)
+        public override void SplitOnClusters(int amountOfClusters, int maxAmountOfSteps)
         {
             try
             {
@@ -35,11 +35,11 @@ namespace Diploma.Algorithms.EM
                     MStep();
                     EStep();
                     index++;
-                } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < 500));
+                } while ((CountChangesInProbabilitiesMatrix(oldProbabilitiesMatrix) > Eps) && (index < maxAmountOfSteps));
 
                 if (IsClusterWithoutEnoughElements(THRESHOLD_COEFFICIENT) && IS_AUTO_CLUSTER_AMOUNT_COUNTER)
                 {
-                    SplitOnClusters(amountOfClusters - 1);
+                    SplitOnClusters(amountOfClusters - 1, maxAmountOfSteps);
                 }
                 else
                 {
@@ -47,11 +47,11 @@ namespace Diploma.Algorithms.EM
                 }
 
                 if (Labels.First() == -1 || Double.IsNaN(HiddenVector.First().MStruct))
-                    SplitOnClusters(amountOfClusters);
+                    SplitOnClusters(amountOfClusters, maxAmountOfSteps);
             }
             catch
             {
-                SplitOnClusters(amountOfClusters);
+                SplitOnClusters(amountOfClusters, maxAmountOfSteps);
             }
         }
 
