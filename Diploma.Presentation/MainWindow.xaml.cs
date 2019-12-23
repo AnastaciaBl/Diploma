@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Diploma.Algorithms.AgglomerativeHierarchic;
@@ -464,9 +465,6 @@ namespace Diploma.Presentation
 
         private void HierarchicBtn_OnClick(object sender, RoutedEventArgs e)
         {
-            //var hAlg = new AgglomerativeHierarchicAglomera(Patients, AttributeMatrix, AmountOfPatients);
-            //hAlg.SplitOnClusters();
-
             HierarchicChart.Series.Clear();
 
             int amountOfClusters = int.TryParse(ClusterAmountHierarchicTb.Text, out amountOfClusters) ? amountOfClusters : 2;
@@ -487,6 +485,35 @@ namespace Diploma.Presentation
             alg.SplitOnClusters();
 
             FillHierarchicChart(alg.Clusters[amountOfClusters - 1].ToArray(), dataF, dataS, amountOfClusters);
+
+            var hAlg = new AgglomerativeHierarchicAglomera(Patients, AttributeMatrix, AmountOfPatients);
+            hAlg.SplitOnClusters();
+            var silhouetteList = new List<HierarchicSilhouetteViewModel>();
+            var daviesBouldinList = new List<HierarchicDaviesBouldinViewModel>();
+            var calinskiList = new List<HierarchicCalinskiHarabaszViewModel>();
+            for (var i = 0; i < hAlg.SilhouetteCoefs.Count; i++)
+            {
+                silhouetteList.Add(new HierarchicSilhouetteViewModel()
+                {
+                    AmountOfClusters = i + 1,
+                    SilhouetteIndex = hAlg.SilhouetteCoefs[i]
+                });
+
+                daviesBouldinList.Add(new HierarchicDaviesBouldinViewModel()
+                {
+                    AmountOfClusters = i + 1,
+                    DaviesBouldinIndex = hAlg.DaviesBouldinCoefs[i]
+                });
+
+                calinskiList.Add(new HierarchicCalinskiHarabaszViewModel()
+                {
+                    AmountOfClusters = i + 1,
+                    CalinskiHarabaszIndex = hAlg.CalinskiHarabaszCoefs[i]
+                });
+            }
+            SilhouetteIndexDg.ItemsSource = silhouetteList;
+            DaviesBouldinIndexDg.ItemsSource = daviesBouldinList;
+            CalinskiHarabaszIndexDg.ItemsSource = calinskiList;
         }
 
         private void CountBicBtn_OnClick(object sender, RoutedEventArgs e)

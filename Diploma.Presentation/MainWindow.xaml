@@ -165,24 +165,42 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Column="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="44*"/>
-                                <ColumnDefinition Width="75*"/>
-                            </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="0.1*"/>
-                                <RowDefinition Height="0.1*"/>
-                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.3*"/>
                                 <RowDefinition Height="0.7*"/>
                             </Grid.RowDefinitions>
 
-                            <Label Grid.Row="0" Content="Amount of clusters:" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
-                            <TextBox Name="ClusterAmountHierarchicTb" Grid.Row="0" Text="2" TextAlignment="Center" HorizontalAlignment="Right" Width="100" Margin="0,5,5,5" Grid.Column="1"/>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="44*"/>
+                                    <ColumnDefinition Width="75*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="0.33*"/>
+                                    <RowDefinition Height="0.33*"/>
+                                    <RowDefinition Height="0.33*"/>
+                                </Grid.RowDefinitions>
 
-                            <ComboBox Name="AttributeHierFirstCb"  Grid.Row="1" Width="100" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
-                            <ComboBox Name="AttributeHierSecondCb" Grid.Row="1" Width="100" HorizontalAlignment="Right" Margin="0,5,5,5" Grid.Column="1"/>
+                                <Label Grid.Row="0" Content="Amount of clusters:" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
+                                <TextBox Name="ClusterAmountHierarchicTb" Grid.Row="0" Text="2" TextAlignment="Center" HorizontalAlignment="Right" Width="100" Margin="0,5,5,5" Grid.Column="1"/>
 
-                            <Button Name="HierarchicBtn" Grid.Row="2" Content="Split" Margin="5,5,5,5" Click="HierarchicBtn_OnClick" Grid.ColumnSpan="2"/>
+                                <ComboBox Name="AttributeHierFirstCb"  Grid.Row="1" Width="100" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
+                                <ComboBox Name="AttributeHierSecondCb" Grid.Row="1" Width="100" HorizontalAlignment="Right" Margin="0,5,5,5" Grid.Column="1"/>
+
+                                <Button Name="HierarchicBtn" Grid.Row="2" Content="Split" Margin="5,5,5,5" Click="HierarchicBtn_OnClick" Grid.ColumnSpan="2"/>
+                            </Grid>
+                            
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="0.33*"/>
+                                    <RowDefinition Height="0.33*"/>
+                                    <RowDefinition Height="0.33*"/>
+                                </Grid.RowDefinitions>
+
+                                <DataGrid Name="SilhouetteIndexDg" Grid.Row="0"/>
+                                <DataGrid Name="CalinskiHarabaszIndexDg" Grid.Row="1"/>
+                                <DataGrid Name="DaviesBouldinIndexDg" Grid.Row="2"/>
+                            </Grid>
                         </Grid>
 
                         <charts:Chart Name="HierarchicChart" Grid.Column="1">

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Diploma.Model;
 
 namespace Diploma.Presentation.Models
 {
