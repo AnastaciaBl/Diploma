@@ -57,7 +57,7 @@ namespace Diploma.Algorithms.AgglomerativeHierarchic
         {
             var coefs = new List<double>();
             var criterion = new SilhouetteCoefficient<DataPoint>(new DataPoint());
-            for (var i = Result.Count - 1; i >= 0; i--)
+            for (var i = Result.Count - 2; i >= 1; i--)
             {
                 coefs.Add(criterion.Evaluate(Result[i]));
             }
@@ -68,7 +68,7 @@ namespace Diploma.Algorithms.AgglomerativeHierarchic
         {
             var coefs = new List<double>();
             var criterion = new SilhouetteCoefficient<DataPoint>(new DataPoint());
-            for (var i = Result.Count - 1; i >= 0; i--)
+            for (var i = Result.Count - 2; i >= 1; i--)
             {
                 coefs.Add(criterion.Evaluate(Result[i]));
             }
@@ -79,7 +79,7 @@ namespace Diploma.Algorithms.AgglomerativeHierarchic
         {
             var coefs = new List<double>();
             var criterion = new SilhouetteCoefficient<DataPoint>(new DataPoint());
-            for (var i = Result.Count - 1; i >= 0; i--)
+            for (var i = Result.Count - 2; i >= 1; i--)
             {
                 coefs.Add(criterion.Evaluate(Result[i]));
             }
