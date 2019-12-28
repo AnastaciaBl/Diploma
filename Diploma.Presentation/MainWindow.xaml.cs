@@ -32,6 +32,7 @@ namespace Diploma.Presentation
         private List<PatientViewModel> PatientsVM { get; set; }
         private double[][] AttributeMatrix { get; set; }
         private PCA PcaResult { get; set; }
+        private AgglomerativeHierarchicAglomera Aglomera { get; set; }
 
         public MainWindow()
         {
@@ -440,82 +441,6 @@ namespace Diploma.Presentation
             BicSem.ItemsSource = bicSEMList;
         }
 
-        private void FillHierarchicChart(int[] labels, double[] firstAttributes, double[] secondAttributes, int amountOfClusters)
-        {
-            for (var i = 0; i < amountOfClusters; i++)
-            {
-                var points = new PointCollection();
-                for (var j = 0; j < labels.Length; j++)
-                {
-                    if(labels[j] == i)
-                        points.Add(new Point(firstAttributes[j], secondAttributes[j]));
-                }
-
-                var series = new ScatterSeries()
-                {
-                    Title = $"{i+1} cluster",
-                    IndependentValuePath = "X",
-                    DependentValuePath = "Y",
-                    ItemsSource = points
-                };
-
-                HierarchicChart.Series.Add(series);
-            }
-        }
-
-        private void HierarchicBtn_OnClick(object sender, RoutedEventArgs e)
-        {
-            HierarchicChart.Series.Clear();
-
-            int amountOfClusters = int.TryParse(ClusterAmountHierarchicTb.Text, out amountOfClusters) ? amountOfClusters : 2;
-            var firstAttributeIndex = AttributeHierFirstCb.SelectedIndex;
-            var secondAttributeIndex = AttributeHierSecondCb.SelectedIndex;
-
-            var dataF = GetDataOfAttribute(firstAttributeIndex);
-            var dataS = GetDataOfAttribute(secondAttributeIndex);
-
-            //two-dimensional data
-            var data = new double[AmountOfPatients][];
-            for (var i = 0; i < AmountOfPatients; i++)
-            {
-                data[i] = new double[2] {dataF[i], dataS[i]};
-            }
-
-            var alg = new AgglomerativeHierarchic(data, 2, AmountOfPatients);
-            alg.SplitOnClusters();
-
-            FillHierarchicChart(alg.Clusters[amountOfClusters - 1].ToArray(), dataF, dataS, amountOfClusters);
-
-            var hAlg = new AgglomerativeHierarchicAglomera(Patients, AttributeMatrix, AmountOfPatients);
-            hAlg.SplitOnClusters();
-            var silhouetteList = new List<HierarchicSilhouetteViewModel>();
-            var daviesBouldinList = new List<HierarchicDaviesBouldinViewModel>();
-            var calinskiList = new List<HierarchicCalinskiHarabaszViewModel>();
-            for (var i = 0; i < hAlg.SilhouetteCoefs.Count; i++)
-            {
-                silhouetteList.Add(new HierarchicSilhouetteViewModel()
-                {
-                    AmountOfClusters = i + 1,
-                    SilhouetteIndex = hAlg.SilhouetteCoefs[i]
-                });
-
-                daviesBouldinList.Add(new HierarchicDaviesBouldinViewModel()
-                {
-                    AmountOfClusters = i + 1,
-                    DaviesBouldinIndex = hAlg.DaviesBouldinCoefs[i]
-                });
-
-                calinskiList.Add(new HierarchicCalinskiHarabaszViewModel()
-                {
-                    AmountOfClusters = i + 1,
-                    CalinskiHarabaszIndex = hAlg.CalinskiHarabaszCoefs[i]
-                });
-            }
-            SilhouetteIndexDg.ItemsSource = silhouetteList;
-            DaviesBouldinIndexDg.ItemsSource = daviesBouldinList;
-            CalinskiHarabaszIndexDg.ItemsSource = calinskiList;
-        }
-
         private void CountBicBtn_OnClick(object sender, RoutedEventArgs e)
         {
             List<int> indexList = null;
@@ -610,5 +535,85 @@ namespace Diploma.Presentation
                 DispersionSumTb.Text = "80";
             }
         }
+
+        private void HierarchicBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            Aglomera = new AgglomerativeHierarchicAglomera(AttributeMatrix, AmountOfPatients);
+            Aglomera.SplitOnClusters();
+            
+            var silhouetteList = new List<HierarchicSilhouetteViewModel>();
+            var daviesBouldinList = new List<HierarchicDaviesBouldinViewModel>();
+            var calinskiList = new List<HierarchicCalinskiHarabaszViewModel>();
+            for (var i = 0; i < Aglomera.SilhouetteCoefs.Count; i++)
+            {
+                silhouetteList.Add(new HierarchicSilhouetteViewModel()
+                {
+                    AmountOfClusters = i + 1,
+                    SilhouetteIndex = Aglomera.SilhouetteCoefs[i]
+                });
+
+                daviesBouldinList.Add(new HierarchicDaviesBouldinViewModel()
+                {
+                    AmountOfClusters = i + 1,
+                    DaviesBouldinIndex = Aglomera.DaviesBouldinCoefs[i]
+                });
+
+                calinskiList.Add(new HierarchicCalinskiHarabaszViewModel()
+                {
+                    AmountOfClusters = i + 1,
+                    CalinskiHarabaszIndex = Aglomera.CalinskiHarabaszCoefs[i]
+                });
+            }
+            SilhouetteIndexDg.ItemsSource = silhouetteList;
+            DaviesBouldinIndexDg.ItemsSource = daviesBouldinList;
+            CalinskiHarabaszIndexDg.ItemsSource = calinskiList;
+
+            HierarchicBtn.IsEnabled = false;
+            HierarchicVisualizeBtn.IsEnabled = true;
+        }
+
+        private void HierarchicVisualizeBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            VisualizeHierarchicChart();
+        }
+
+        private void VisualizeHierarchicChart()
+        {
+            HierarchicChart.Series.Clear();
+
+            int amountOfClusters = int.TryParse(ClusterAmountHierarchicTb.Text, out amountOfClusters) ? amountOfClusters : 2;
+            var labels = Aglomera.GetLabels(amountOfClusters);
+            var firstAttributeIndex = AttributeHierFirstCb.SelectedIndex;
+            var secondAttributeIndex = AttributeHierSecondCb.SelectedIndex;
+
+            var dataF = GetDataOfAttribute(firstAttributeIndex);
+            var dataS = GetDataOfAttribute(secondAttributeIndex);
+            
+            FillHierarchicChart(labels, dataF, dataS, amountOfClusters);
+        }
+
+        private void FillHierarchicChart(int[] labels, double[] firstAttributes, double[] secondAttributes, int amountOfClusters)
+        {
+            for (var i = 0; i < amountOfClusters; i++)
+            {
+                var points = new PointCollection();
+                for (var j = 0; j < labels.Length; j++)
+                {
+                    if (labels[j] == i + 1)
+                        points.Add(new Point(firstAttributes[j], secondAttributes[j]));
+                }
+
+                var series = new ScatterSeries()
+                {
+                    Title = $"{i + 1} cluster",
+                    IndependentValuePath = "X",
+                    DependentValuePath = "Y",
+                    ItemsSource = points
+                };
+
+                HierarchicChart.Series.Add(series);
+            }
+        }
+
     }
 }

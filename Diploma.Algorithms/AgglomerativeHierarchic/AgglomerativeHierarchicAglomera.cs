@@ -1,4 +1,5 @@
-﻿using Aglomera;
+﻿using System;
+using Aglomera;
 using Aglomera.D3;
 using Aglomera.Evaluation.Internal;
 using Aglomera.Linkage;
@@ -16,20 +17,20 @@ namespace Diploma.Algorithms.AgglomerativeHierarchic
         public List<double> CalinskiHarabaszCoefs { get; set; }
         public List<double> DaviesBouldinCoefs { get; set; }
 
-        public AgglomerativeHierarchicAglomera(List<Patient> patients, double[][] data, int amountOfElements)
+        public AgglomerativeHierarchicAglomera(double[][] data, int amountOfElements)
         {
-            DataSet = CreateDataSet(patients, data, amountOfElements);
+            DataSet = CreateDataSet(data, amountOfElements);
             SilhouetteCoefs = new List<double>();
             CalinskiHarabaszCoefs = new List<double>();
             DaviesBouldinCoefs = new List<double>();
         }
 
-        private HashSet<DataPoint> CreateDataSet(List<Patient> patients, double[][] data, int amountOfElements)
+        private HashSet<DataPoint> CreateDataSet(double[][] data, int amountOfElements)
         {
             var set = new HashSet<DataPoint>();
             for (var i = 0; i < amountOfElements; i++)
             {
-                set.Add(new DataPoint(patients[i].Id.ToString(), data[i]));
+                set.Add(new DataPoint(i.ToString(), data[i]));
             }
 
             return set;
@@ -83,6 +84,25 @@ namespace Diploma.Algorithms.AgglomerativeHierarchic
                 coefs.Add(criterion.Evaluate(Result[i]));
             }
             return coefs;
+        }
+
+        public int[] GetLabels(int amountOfClusters)
+        {
+            var result = Result[Result.Count - amountOfClusters];
+            var labels = new int[DataSet.Count];
+
+            var clusterIndex = 1;
+            foreach (var clusterSet in result)
+            {
+                foreach (var cluster in clusterSet)
+                {
+                    labels[Convert.ToInt32(cluster.ID)] = clusterIndex;
+                }
+
+                clusterIndex++;
+            }
+
+            return labels;
         }
     }
 }

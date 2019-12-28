@@ -187,7 +187,8 @@
                                 <ComboBox Name="AttributeHierFirstCb"  Grid.Row="1" Width="100" HorizontalAlignment="Left" Margin="5,5,0,5" Grid.ColumnSpan="2"/>
                                 <ComboBox Name="AttributeHierSecondCb" Grid.Row="1" Width="100" HorizontalAlignment="Right" Margin="0,5,5,5" Grid.Column="1"/>
 
-                                <Button Name="HierarchicBtn" Grid.Row="2" Content="Split" Margin="5,5,5,5" Click="HierarchicBtn_OnClick" Grid.ColumnSpan="2"/>
+                                <Button Name="HierarchicBtn" Grid.Row="2" Grid.Column="1"  Content="Split" Margin="5,5,5,5" Click="HierarchicBtn_OnClick"/>
+                                <Button Name="HierarchicVisualizeBtn" Grid.Row="2" Grid.Column="0"  Content="Visualize" Margin="5,5,5,5" IsEnabled="False" Click="HierarchicVisualizeBtn_OnClick"/>
                             </Grid>
                             
                             <Grid Grid.Row="1">
