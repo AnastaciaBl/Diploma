@@ -44,7 +44,6 @@ namespace Diploma.Presentation
             legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
             AllPatientsChart.LegendStyle = legendStyle;
             OneAttributeBarChart.LegendStyle = legendStyle;
-            PcaChart.LegendStyle = legendStyle;
         }
 
         //can be useful
@@ -367,78 +366,57 @@ namespace Diploma.Presentation
             PcaParametersDg.ItemsSource = pcaViewModel;
         }
 
-        private void KMeansForPcaBtn_OnClick(object sender, RoutedEventArgs e)
+        private List<BICViewModel> CountBicCriteria(List<int> indexesOfMeaningfullParameters)
         {
-            int amountOfClusters = int.TryParse(AmountOfClustersKMeansForPca.Text, out amountOfClusters)
-                ? amountOfClusters
-                : 2;
-
-            var kMeans = new KMeansAlgorithm(amountOfClusters, PcaResult.ProjectionSet);
-            kMeans.SplitOnClusters();
-            PcaChart.Series.Clear();
-
-            FillChartAfterKMeansAlgorithm(kMeans, PcaChart);
-        }
-
-        private void CountBicCriteria(List<int> indexesOfMeaningfullParameters)
-        {
-            var bicEMList = new List<BICViewModel>();
-            var bicSEMList = new List<BICViewModel>();
+            var bicList = new List<BICViewModel>();
             var amountOfClusters = 1;
             var paramAmount = 3;
             var maxAmountOfSteps = 30;
             var distribution = new NormalDistribution();
             for (var i = 0; i < indexesOfMeaningfullParameters.Count; i++)
             {
+                var bicViewModel = new BICViewModel();
+                bicViewModel.Component = indexesOfMeaningfullParameters[i];
+
                 var em = new EMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS);
                 em.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 var bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
-                bicEMList.Add(new BICViewModel()
-                {
-                    BIC = bic,
-                    ClusterAmount = amountOfClusters,
-                    Component = indexesOfMeaningfullParameters[i]
-                });
+                bicViewModel.EM_BIC_1_cluster = Math.Round(bic, 3);
 
                 var sem = new SEMAlgorithm(distribution, PcaResult.GetVecorByIndex(indexesOfMeaningfullParameters[i]).ToList(), Constant.EPS, false);
                 sem.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
-                bicSEMList.Add(new BICViewModel()
-                {
-                    BIC = bic,
-                    ClusterAmount = amountOfClusters,
-                    Component = indexesOfMeaningfullParameters[i]
-                });
+                bicViewModel.SEM_BIC_1_cluster = Math.Round(bic, 3);
 
                 amountOfClusters++;
 
                 em.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, em.DataSetValues, em.HiddenVector);
-                bicEMList.Add(new BICViewModel()
-                {
-                    BIC = bic,
-                    ClusterAmount = amountOfClusters,
-                    Component = indexesOfMeaningfullParameters[i]
-                });
+                bicViewModel.EM_BIC_2_cluster = Math.Round(bic, 3);
 
                 sem.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
 
                 bic = BIC.Count(distribution, paramAmount * amountOfClusters, sem.DataSetValues, sem.HiddenVector);
-                bicSEMList.Add(new BICViewModel()
-                {
-                    BIC = bic,
-                    ClusterAmount = amountOfClusters,
-                    Component = indexesOfMeaningfullParameters[i]
-                });
+                bicViewModel.SEM_BIC_2_cluster = Math.Round(bic, 3);
 
                 amountOfClusters = 1;
+
+                if (bicViewModel.EM_BIC_1_cluster < bicViewModel.EM_BIC_2_cluster)
+                    bicViewModel.EM_Recom_Amount_Of_Clusters = amountOfClusters;
+                else bicViewModel.EM_Recom_Amount_Of_Clusters = amountOfClusters + 1;
+
+                if (bicViewModel.SEM_BIC_1_cluster < bicViewModel.SEM_BIC_2_cluster)
+                    bicViewModel.SEM_Recom_Amount_Of_Clusters = amountOfClusters;
+                else bicViewModel.SEM_Recom_Amount_Of_Clusters = amountOfClusters + 1;
+
+                bicList.Add(bicViewModel);
             }
 
-            BicEm.ItemsSource = bicEMList;
-            BicSem.ItemsSource = bicSEMList;
+            BicStatistic.ItemsSource = bicList;
+            return bicList;
         }
 
         private void CountBicBtn_OnClick(object sender, RoutedEventArgs e)
@@ -455,8 +433,22 @@ namespace Diploma.Presentation
                     break;
             }
 
-            CountBicCriteria(indexList);
-            CountAndPrintAutoSem(indexList);
+            var bicList = CountBicCriteria(indexList);
+            var autoSemList = CountAndPrintAutoSem(indexList);
+
+            if (ExcludeComponentsRBtn.IsEnabled)
+            {
+                for (var i = 0; i < indexList.Count; i++)
+                {
+                    if (bicList[i].EM_Recom_Amount_Of_Clusters == 1 && bicList[i].SEM_Recom_Amount_Of_Clusters == 1 &&
+                        autoSemList[i].AutoAmountOfClusters == 1)
+                    {
+                        indexList.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+
             var valuableParameterIndexes = PcaResult.GetValuableParameterIndexes(indexList, Patients.Count);
             var uniqueIndexes = ValuableParametersViewModel.GetUniqueIndexes(valuableParameterIndexes, indexList.Count);
             var vIndexVm = new List<ValuableParametersViewModel>();
@@ -472,7 +464,7 @@ namespace Diploma.Presentation
             ValuableParametersDg.ItemsSource = vIndexVm;
         }
 
-        private void CountAndPrintAutoSem(List<int> indexesOfMeaningfullParameters)
+        private List<AutoSemViewModel> CountAndPrintAutoSem(List<int> indexesOfMeaningfullParameters)
         {
             var maxAmountOfSteps = 100;
             var distribution = new NormalDistribution();
@@ -486,12 +478,13 @@ namespace Diploma.Presentation
                 {
                     Component = indexesOfMeaningfullParameters[i],
                     AmountOfClusters = amountOfClusters,
-                    ThresholdCoefficient = Math.Round(sem.THRESHOLD_COEFFICIENT * 1.0 / sem.AmountOfElements , 2),
+                    ThresholdCoef = $"{Math.Round(sem.THRESHOLD_COEFFICIENT * 100.0 / sem.AmountOfElements)} %",
                     AutoAmountOfClusters = sem.AmountOfClusters
                 }); 
             }
 
             BicSemAuto.ItemsSource = results;
+            return results;
         }
 
         private List<int> GetMeaningfullIndexesByEigenValueCriteria(double eigenValue = 1)

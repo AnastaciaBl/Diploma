@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Diploma.Algorithms.EM;
 
 namespace Diploma.Presentation.Models
@@ -16,9 +17,9 @@ namespace Diploma.Presentation.Models
             {
                 hv.Add(new HiddenVectorViewModel
                 {
-                    Average = parameterses[i].MStruct,
-                    Dispersion = parameterses[i].GStruct,
-                    Probability = parameterses[i].СStruct
+                    Average = Math.Round(parameterses[i].MStruct, 3),
+                    Dispersion = Math.Round(parameterses[i].GStruct, 3),
+                    Probability = Math.Round(parameterses[i].СStruct, 3)
                 });
             }
 

@@ -22,15 +22,19 @@ namespace Diploma.Algorithms.PCA
         {
             DataSet = data;
             Pca = new PrincipalComponentAnalysis(PrincipalComponentMethod.Standardize);
-            //PrincipalComponentMethod.CovarianceMatrix
         }
 
         public void CreateComponents()
         {
             Pca.Learn(DataSet);
             ProjectionSet = Pca.Transform(DataSet);
-            CumulativeProportion = Pca.CumulativeProportions;
-            Proportion = Pca.ComponentProportions;
+            CumulativeProportion = new double[Pca.CumulativeProportions.Length];
+            Proportion = new double [Pca.ComponentProportions.Length];
+            for (var i = 0; i < Proportion.Length; i++)
+            {
+                CumulativeProportion[i] = Math.Round(Pca.CumulativeProportions[i], 3);
+                Proportion[i] = Math.Round(Pca.ComponentProportions[i], 3);
+            }
             FillParameters();
         }
 
@@ -41,8 +45,8 @@ namespace Diploma.Algorithms.PCA
             SingularValues = new double[AmountOfComponents];
             for (var i = 0; i < AmountOfComponents; i++)
             {
-                EigenValues[i] = Pca.Components[i].Eigenvalue;
-                SingularValues[i] = Pca.Components[i].SingularValue;
+                EigenValues[i] = Math.Round(Pca.Components[i].Eigenvalue, 3);
+                SingularValues[i] = Math.Round(Pca.Components[i].SingularValue, 3);
             }
         }
 
