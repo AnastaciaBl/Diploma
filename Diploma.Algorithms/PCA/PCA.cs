@@ -3,6 +3,7 @@ using Accord.Statistics.Analysis;
 using Diploma.Model;
 using System;
 using System.Collections.Generic;
+using Accord.Statistics.Testing;
 
 namespace Diploma.Algorithms.PCA
 {
@@ -71,7 +72,8 @@ namespace Diploma.Algorithms.PCA
                     var array = GetArrayForCorrelationAnalysis(amountOfObservations, j, valuableComponentIndexes[i]);
                     if (CountCorrelation(array) > coefficient)
                     {
-                        indexes.Add(j);
+                        if(TTest(amountOfObservations, j, valuableComponentIndexes[i]))
+                            indexes.Add(j);
                     }
                 }
                 matrix[i] = indexes.ToArray();
@@ -96,6 +98,20 @@ namespace Diploma.Algorithms.PCA
         {
             var matrix = Measures.Correlation(array);
             return Math.Abs(matrix[0, 1]);
+        }
+
+        private bool TTest(int amountOfObservations, int parameterIndex, int componentIndex)
+        {
+            var array1 = new double[amountOfObservations];
+            var array2 = new double[amountOfObservations];
+            for (var i = 0; i < amountOfObservations; i++)
+            {
+                array1[i] = DataSet[i][parameterIndex];
+                array2[i] = ProjectionSet[i][componentIndex];
+            }
+
+            var pairedTTest = new PairedTTest(array1, array2, TwoSampleHypothesis.ValuesAreDifferent);
+            return pairedTTest.Significant;
         }
     }
 }
