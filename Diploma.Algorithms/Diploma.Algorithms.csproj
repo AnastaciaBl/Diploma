@@ -162,6 +162,7 @@
     <Compile Include="AgglomerativeHierarchic\AgglomerativeHierarchicAglomera.cs" />
     <Compile Include="AgglomerativeHierarchic\DataPoint.cs" />
     <Compile Include="Criterion\BIC.cs" />
+    <Compile Include="Criterion\RandIndex.cs" />
     <Compile Include="Distribution\IDistribution.cs" />
     <Compile Include="Distribution\NormalDistribution.cs" />
     <Compile Include="EM\EMAlgorithm.cs" />
