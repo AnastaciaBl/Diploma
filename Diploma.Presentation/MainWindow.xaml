@@ -34,9 +34,6 @@
             <TabControl Grid.Row="0" Grid.Column ="0">
                 <TabItem Header="Data">
                     <Grid Background="#FFE5E5E5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="0.35*"/>
                             <ColumnDefinition Width="0.65*"/>
@@ -44,34 +41,23 @@
 
                         <DataGrid Name="PatientsDataGrid" Grid.Column="0" Margin="5,5,5,5" AutoGenerateColumns="True" ItemsSource="{Binding patients}"/>
 
-                        <Grid Grid.Column="1">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="0.1*"/>
-                                <RowDefinition Height="0.9*"/>
-                            </Grid.RowDefinitions>
-
-                            <Label Grid.Row="0" Content="Amount of clusters:" Margin="35,5,5,5" HorizontalAlignment="Left"/>
-                            <TextBox Name="AmountOfClustersKMeansTB" Grid.Row="0" Text="2" Margin="155,5,5,5" Width="100"  TextAlignment="Center"  HorizontalAlignment="Left"></TextBox>
-                            <Button Name="AmountOfClusterKMeans" Grid.Row="0" Content="Split on clusters" Margin="5,5,5,5" Width="200" HorizontalAlignment="Right" Click="AmountOfClusterKMeans_OnClick"/>
-
-                            <charts:Chart x:Name="AllPatientsChart" Grid.Row="1" Margin="5,5,5,5">
-                                <charts:Chart.Template>
-                                    <ControlTemplate TargetType="charts:Chart">
-                                        <DockPanel>
-                                            <visualizationToolkit:Legend x:Name="Legend" Style="{TemplateBinding LegendStyle}" DockPanel.Dock="Right" />
-                                            <primitives:EdgePanel x:Name="ChartArea" Style="{TemplateBinding ChartAreaStyle}">
-                                                <Grid Canvas.ZIndex="-1" Style="{TemplateBinding PlotAreaStyle}" />
-                                                <Border Canvas.ZIndex="10" BorderBrush="#FF919191" BorderThickness="1" />
-                                            </primitives:EdgePanel>
-                                        </DockPanel>
-                                    </ControlTemplate>
-                                </charts:Chart.Template>
-                                <charts:Chart.Axes>
-                                    <charts:LinearAxis Orientation="X" Minimum="0"/>
-                                    <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
-                                </charts:Chart.Axes>
-                            </charts:Chart>
-                        </Grid>
+                        <charts:Chart x:Name="AllPatientsChart" Grid.Column="1" Margin="5,5,5,5">
+                            <charts:Chart.Template>
+                                <ControlTemplate TargetType="charts:Chart">
+                                    <DockPanel>
+                                        <visualizationToolkit:Legend x:Name="Legend" Style="{TemplateBinding LegendStyle}" DockPanel.Dock="Right" />
+                                        <primitives:EdgePanel x:Name="ChartArea" Style="{TemplateBinding ChartAreaStyle}">
+                                            <Grid Canvas.ZIndex="-1" Style="{TemplateBinding PlotAreaStyle}" />
+                                            <Border Canvas.ZIndex="10" BorderBrush="#FF919191" BorderThickness="1" />
+                                        </primitives:EdgePanel>
+                                    </DockPanel>
+                                </ControlTemplate>
+                            </charts:Chart.Template>
+                            <charts:Chart.Axes>
+                                <charts:LinearAxis Orientation="X" Minimum="0"/>
+                                <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
+                            </charts:Chart.Axes>
+                        </charts:Chart>
                     </Grid>
                 </TabItem>
                 <TabItem Header="EM and SEM">
@@ -163,7 +149,7 @@
                                 <TextBox Name="DispersionSumTb" Grid.Row="1" IsEnabled="False" Width="80" HorizontalAlignment="Left" Margin="115,5,5,5"/>
                                 <Button Name="CountBicBtn" Content="Apply" Grid.Row="1" Width="100" HorizontalAlignment="Right" Margin="5,5,5,5" Click="CountBicBtn_OnClick"/>
 
-                                <RadioButton Name="ExcludeComponentsRBtn" Grid.Row="2" Content="Exclude comp. if recommended amount of clusters is 1" Margin="5,5,5,5"/>
+                                <CheckBox Name="ExcludeComponentsRBtn" Grid.Row="2" Content="Exclude comp. if recommended amount of clusters is 1" Margin="5,5,5,5" Click="ExcludeComponentsRBtn_OnClick"/>
                             </Grid>
                         </Grid>
 
@@ -243,6 +229,64 @@
                         </Grid>
 
                         <charts:Chart Name="HierarchicChart" Grid.Column="1">
+                            <charts:Chart.Axes>
+                                <charts:LinearAxis Orientation="X" Minimum="0"/>
+                                <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>
+                            </charts:Chart.Axes>
+                        </charts:Chart>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Statistic">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.35*"/>
+                            <ColumnDefinition Width="0.65*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition Height="0.1*"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.4*"/>
+                                    <ColumnDefinition Width="0.2*"/>
+                                    <ColumnDefinition Width="0.4*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Column="0" Content="Amount of clusters:" Margin="5,5,5,5"/>
+                                <TextBox Name="AmountOfClustersForStatisticTb" Grid.Column="1" Text="2" Margin="5,5,5,5" TextAlignment="Center"></TextBox>
+                                <Button Name="AmountOfClusterKMeans" Grid.Column="2" Content="Split on clusters" Margin="5,5,5,5" Click="AmountOfClusterKMeans_OnClick"/>
+                            </Grid>
+
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox Name="ClusterAlgCb" Grid.Column="0" Margin="5,5,5,5"/>
+                                <ComboBox Name="AmountOfIndexesCb" Grid.Column="1" Margin="5,5,5,5"/>
+                            </Grid>
+
+                            <DataGrid Name="RandIndexDg" Grid.Row="2"/>
+                        </Grid>
+
+                        <charts:Chart x:Name="AllPatientsAfterClusteringChart" Grid.Column="1" Margin="5,5,5,5">
+                            <charts:Chart.Template>
+                                <ControlTemplate TargetType="charts:Chart">
+                                    <DockPanel>
+                                        <visualizationToolkit:Legend x:Name="Legend" Style="{TemplateBinding LegendStyle}" DockPanel.Dock="Right" />
+                                        <primitives:EdgePanel x:Name="ChartArea" Style="{TemplateBinding ChartAreaStyle}">
+                                            <Grid Canvas.ZIndex="-1" Style="{TemplateBinding PlotAreaStyle}" />
+                                            <Border Canvas.ZIndex="10" BorderBrush="#FF919191" BorderThickness="1" />
+                                        </primitives:EdgePanel>
+                                    </DockPanel>
+                                </ControlTemplate>
+                            </charts:Chart.Template>
                             <charts:Chart.Axes>
                                 <charts:LinearAxis Orientation="X" Minimum="0"/>
                                 <charts:LinearAxis Orientation="Y" Minimum="0" Location="Left"/>

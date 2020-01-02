@@ -1,6 +1,9 @@
-﻿using Diploma.Algorithms.Distribution;
+﻿using Diploma.Algorithms.AgglomerativeHierarchic;
+using Diploma.Algorithms.Criterion;
+using Diploma.Algorithms.Distribution;
 using Diploma.Algorithms.EM;
 using Diploma.Algorithms.Kmeans;
+using Diploma.Algorithms.PCA;
 using Diploma.Algorithms.StatisticalAnalysis;
 using Diploma.Data;
 using Diploma.Model;
@@ -13,12 +16,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
-using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Diploma.Algorithms.AgglomerativeHierarchic;
-using Diploma.Algorithms.Criterion;
-using Diploma.Algorithms.PCA;
 
 namespace Diploma.Presentation
 {
@@ -33,6 +32,7 @@ namespace Diploma.Presentation
         private double[][] AttributeMatrix { get; set; }
         private PCA PcaResult { get; set; }
         private AgglomerativeHierarchicAglomera Aglomera { get; set; }
+        private List<int> ValuableIndexes { get; set; }
 
         public MainWindow()
         {
@@ -44,15 +44,7 @@ namespace Diploma.Presentation
             legendStyle.Setters.Add(new Setter(HeightProperty, 0.0));
             AllPatientsChart.LegendStyle = legendStyle;
             OneAttributeBarChart.LegendStyle = legendStyle;
-        }
-
-        //can be useful
-        public void FillData(ref PointCollection array, List<double> data)
-        {
-            for (int i = 0; i < data.Count; i++)
-            {
-                array.Add(new Point(i, data[i]));
-            }
+            AllPatientsAfterClusteringChart.LegendStyle = legendStyle;
         }
 
         public void FillDataToElements()
@@ -108,6 +100,12 @@ namespace Diploma.Presentation
 
             ComponentsPickOutCb.ItemsSource = new List<string> {"Eigen value < 1", "Sum of dispersion"};
             ComponentsPickOutCb.SelectedIndex = 0;
+
+            ClusterAlgCb.ItemsSource = new List<string>() {"KMeans", "Hierarchic"};
+            ClusterAlgCb.SelectedIndex = 0;
+
+            AmountOfIndexesCb.ItemsSource = new List<string>() {"All indexes", "Valuable indexes"};
+            AmountOfIndexesCb.SelectedIndex = 0;
         }
 
         public void FillAllPatientsChart()
@@ -225,20 +223,97 @@ namespace Diploma.Presentation
 
         private void AmountOfClusterKMeans_OnClick(object sender, RoutedEventArgs e)
         {
-            var amountOfClusters = Convert.ToInt32(AmountOfClustersKMeansTB.Text);
-            var kMeans = new KMeansAlgorithm(amountOfClusters, AttributeMatrix);
-            kMeans.SplitOnClusters();
+            int amountOfClusters = int.TryParse(AmountOfClustersForStatisticTb.Text, out amountOfClusters) ? amountOfClusters : 1;
+            int algIndex = ClusterAlgCb.SelectedIndex;
+            int[] allAtrLabels = null;
+            int[] valuableAttrLabels = null;
 
-            AllPatientsChart.Series.Clear();
-            FillChartAfterKMeansAlgorithm(kMeans, AllPatientsChart);
+            AllPatientsAfterClusteringChart.Series.Clear();
+            switch (algIndex)
+            {
+                case 0:
+                    allAtrLabels = GetLabelsByKMeans(amountOfClusters, AttributeMatrix);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByKMeans(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes));
+                        FillChartAfterClustering(valuableAttrLabels, AllPatientsAfterClusteringChart);
+                    }
+                    break;
+                case 1:
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes));
+                    }
+                    break;
+            }
+
+            if (valuableAttrLabels != null)
+            {
+                RandIndexDg.ItemsSource = new List<RandIndexViewModel>()
+                {
+                    new RandIndexViewModel()
+                    {
+                        AllAttr = Constant.AMOUNT_OF_ATTRIBUTES,
+                        AttrAfterReduction = ValuableIndexes.Count,
+                        RandIndex = GetRandIndex(amountOfClusters, allAtrLabels, valuableAttrLabels)
+                    }
+                };
+
+                FillChartAfterClustering(valuableAttrLabels, AllPatientsAfterClusteringChart);
+            }
+            else
+            {
+                RandIndexDg.ItemsSource = null;
+                FillChartAfterClustering(allAtrLabels, AllPatientsAfterClusteringChart);
+            }
         }
 
-        public void FillChartAfterKMeansAlgorithm(KMeansAlgorithm kMeans, Chart chart)
+        private int[] GetLabelsByHierarchic(int amountOfClusters, double[][] dataSet)
+        {
+            var hierarchic = new AgglomerativeHierarchicAglomera(dataSet, AmountOfPatients);
+            hierarchic.SplitOnClusters();
+            return hierarchic.GetLabels(amountOfClusters);
+        }
+
+        private int[] GetLabelsByKMeans(int amountOfClusters, double[][] dataSet)
+        {
+            var kMeans = new KMeansAlgorithm();
+            var labels = kMeans.SplitOnClusters(amountOfClusters, dataSet);
+            return labels;
+        }
+
+        private double GetRandIndex(int amountOfClusters, int[] etalonLabels, int[] labels)
+        {
+            var index = new RandIndex();
+            var matrix = index.CreateMatrixOfLabels(amountOfClusters, amountOfClusters, etalonLabels, labels);
+
+            return index.GetRandIndex(matrix);
+        }
+
+        private double[][] GetAttributeMatrixByIndexes(List<int> indexes)
+        {
+            var matrix = new double[AmountOfPatients][];
+            for (var i = 0; i < AmountOfPatients; i++)
+            {
+                matrix[i] = new double[indexes.Count];
+                for (var j = 0; j < indexes.Count; j++)
+                {
+                    matrix[i][j] = AttributeMatrix[i][indexes[j]];
+                }
+            }
+
+            return matrix;
+        }
+
+        public void FillChartAfterClustering(int[] labels, Chart chart)
         {
             for (var i = 0; i < AmountOfPatients; i++)
             {
                 SolidColorBrush color = null;
-                switch (kMeans.Labels[i])
+                switch (labels[i])
                 {
                     case 0:
                         color = new SolidColorBrush(Colors.Blue);
@@ -436,7 +511,7 @@ namespace Diploma.Presentation
             var bicList = CountBicCriteria(indexList);
             var autoSemList = CountAndPrintAutoSem(indexList);
 
-            if (ExcludeComponentsRBtn.IsEnabled)
+            if (ExcludeComponentsRBtn.IsChecked == true)
             {
                 for (var i = 0; i < indexList.Count; i++)
                 {
@@ -450,9 +525,9 @@ namespace Diploma.Presentation
             }
 
             var valuableParameterIndexes = PcaResult.GetValuableParameterIndexes(indexList, Patients.Count);
-            var uniqueIndexes = ValuableParametersViewModel.GetUniqueIndexes(valuableParameterIndexes, indexList.Count);
+            ValuableIndexes = ValuableParametersViewModel.GetUniqueIndexes(valuableParameterIndexes, indexList.Count);
             var vIndexVm = new List<ValuableParametersViewModel>();
-            foreach (var index in uniqueIndexes)
+            foreach (var index in ValuableIndexes)
             {
                 vIndexVm.Add(new ValuableParametersViewModel()
                 {
@@ -608,5 +683,9 @@ namespace Diploma.Presentation
             }
         }
 
+        private void ExcludeComponentsRBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            
+        }
     }
 }

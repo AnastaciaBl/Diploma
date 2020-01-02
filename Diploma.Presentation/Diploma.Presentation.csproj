@@ -81,6 +81,7 @@
     <Compile Include="Models\HierarchicSilhouetteViewModel.cs" />
     <Compile Include="Models\PatientViewModel.cs" />
     <Compile Include="Models\PcaViewModel.cs" />
+    <Compile Include="Models\RandIndexViewModel.cs" />
     <Compile Include="Models\ValuableParametersViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

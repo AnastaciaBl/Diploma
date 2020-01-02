@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MathNet.Numerics;
+﻿using MathNet.Numerics;
+using System;
 
 namespace Diploma.Algorithms.Criterion
 {
@@ -82,7 +78,7 @@ namespace Diploma.Algorithms.Criterion
             var tn = tp_fp_fn_tn - tp_fn - fp;
 
             index = (tp + tn) / tp_fp_fn_tn;
-            return index;
+            return Math.Round(index, 3);
         }
     }
 }
