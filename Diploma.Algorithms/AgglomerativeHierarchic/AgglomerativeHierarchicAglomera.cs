@@ -1,10 +1,9 @@
-﻿using System;
-using Aglomera;
+﻿using Aglomera;
 using Aglomera.D3;
 using Aglomera.Evaluation.Internal;
 using Aglomera.Linkage;
-using Diploma.Model;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Diploma.Algorithms.AgglomerativeHierarchic
@@ -41,10 +40,37 @@ namespace Diploma.Algorithms.AgglomerativeHierarchic
             Result.SaveD3DendrogramFile("result.json", formatting: Formatting.Indented);
         }
 
-        public void SplitOnClusters()
+        public void SplitOnClusters(int algoritmIndex)
         {
-            var linkage = new AverageLinkage<DataPoint>(new DataPoint());
-            var algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage);
+            AgglomerativeClusteringAlgorithm<DataPoint> algorithm = null;
+            switch (algoritmIndex)
+            {
+                case 1:
+                    var linkage1 = new CompleteLinkage<DataPoint>(new DataPoint());
+                    algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage1);
+                    break;
+                case 2:
+                    var linkage2 = new AverageLinkage<DataPoint>(new DataPoint());
+                    algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage2);
+                    break;
+                case 3:
+                    var linkage3 = new CentroidLinkage<DataPoint>(new DataPoint(), DataPoint.GetCentroid);
+                    algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage3);
+                    break;
+                case 4:
+                    var linkage4 = new MinimumEnergyLinkage<DataPoint>(new DataPoint());
+                    algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage4);
+                    break;
+                case 5:
+                    var linkage5 = new SingleLinkage<DataPoint>(new DataPoint());
+                    algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage5);
+                    break;
+                case 6:
+                    var linkage6 = new WardsMinimumVarianceLinkage<DataPoint>(new DataPoint(), DataPoint.GetCentroid);
+                    algorithm = new AgglomerativeClusteringAlgorithm<DataPoint>(linkage6);
+                    break;
+            }
+            
             Result = algorithm.GetClustering(DataSet);
             CreateJson();
 

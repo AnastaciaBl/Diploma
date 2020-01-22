@@ -7,8 +7,8 @@ namespace Diploma.Presentation.Models
     public class PatientViewModel
     {
         public int Id { get; set; }
-        public int RegistrationYear { get; set; }
-        public double FinalResult { get; set; }
+        //public int RegistrationYear { get; set; }
+        //public double FinalResult { get; set; }
 
         //*****Memory
 
@@ -76,8 +76,8 @@ namespace Diploma.Presentation.Models
                 patientsList.Add(new PatientViewModel()
                 {
                     Id = p.Id,
-                    RegistrationYear = p.RegistrationYear,
-                    FinalResult = p.FinalResult,
+                    //RegistrationYear = p.RegistrationYear,
+                    //FinalResult = p.FinalResult,
 
                     //memory
                     FirstTest = p.MemoryResult.TenWordsTest.FirstTest.Result,

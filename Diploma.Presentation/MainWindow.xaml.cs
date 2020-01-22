@@ -11,6 +11,7 @@ using Diploma.Presentation.Models;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,7 @@ using System.Windows.Controls.DataVisualization;
 using System.Windows.Controls.DataVisualization.Charting;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using MathNet.Numerics.Distributions;
 
 namespace Diploma.Presentation
 {
@@ -101,7 +103,7 @@ namespace Diploma.Presentation
             ComponentsPickOutCb.ItemsSource = new List<string> {"Eigen value < 1", "Sum of dispersion"};
             ComponentsPickOutCb.SelectedIndex = 0;
 
-            ClusterAlgCb.ItemsSource = new List<string>() {"KMeans", "Hierarchic"};
+            ClusterAlgCb.ItemsSource = new List<string>() {"KMeans", "Hierarchic Complete", "Hierarchic Average", "Hierarchic Centroid", "Hierarchic Minimum Energy", "Hierarchic Single", "Hierarchic Ward`s minimum" };
             ClusterAlgCb.SelectedIndex = 0;
 
             AmountOfIndexesCb.ItemsSource = new List<string>() {"All indexes", "Valuable indexes"};
@@ -144,20 +146,52 @@ namespace Diploma.Presentation
             var distribution = new NormalDistribution();
             var eps = Constant.EPS;
 
+            //EMAlgorithm algorithmTest = null;
+            //var testData = GenerateTestData();
+
             switch (AlgorithmCb.SelectedIndex)
             {
                 case 0:
                     algorithm = new EMAlgorithm(distribution, data.ToList(), eps);
+                    //algorithmTest = new EMAlgorithm(distribution, testData, eps);
                     break;
                 case 1:
                     algorithm = new SEMAlgorithm(distribution, data.ToList(), eps, true);
+                    //algorithmTest = new SEMAlgorithm(distribution, testData, eps, true);
                     break;
             }
+            OneAttributeBarChart.Series.Clear();
             algorithm.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
             var labels = algorithm.Labels;
             HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithm.HiddenVector, algorithm.AmountOfClusters);
             FillBarChart(data, amountOfClasses);
             SetProbabilityDensityOnBarChart(data, algorithm.HiddenVector, algorithm.AmountOfClusters, labels);
+
+            //algorithmTest.SplitOnClusters(amountOfClusters, maxAmountOfSteps);
+            //var labels = algorithmTest.Labels;
+            //HiddenVectorDG.ItemsSource = HiddenVectorViewModel.GetListOfHiddenVectorVM(algorithmTest.HiddenVector, algorithmTest.AmountOfClusters);
+            //FillBarChart(testData.ToArray(), amountOfClasses);
+            //SetProbabilityDensityOnBarChart(testData.ToArray(), algorithmTest.HiddenVector, algorithmTest.AmountOfClusters, labels);
+        }
+
+        private List<double> GenerateTestData()
+        {
+            var EtalonHiddenVector = new List<Parameters>();
+            EtalonHiddenVector.Add(new Parameters(0, 2, 0.6));
+            EtalonHiddenVector.Add(new Parameters(5, 2, 0.4));
+            var amountOfElements = 1000;
+            var sample = new List<double>();
+            for (int i = 0; i < 2; i++)
+            {
+                int amountOfElementsInCluster = (int)(EtalonHiddenVector[i].СStruct * amountOfElements);
+                Normal random = new Normal(EtalonHiddenVector[i].MStruct, Math.Sqrt(EtalonHiddenVector[i].GStruct));
+                for (int j = 0; j < amountOfElementsInCluster; j++)
+                {
+                    sample.Add(random.Sample());
+                }
+            }
+
+            return sample;
         }
 
         private double[] GetDataOfAttribute(int index)
@@ -233,19 +267,84 @@ namespace Diploma.Presentation
             {
                 case 0:
                     allAtrLabels = GetLabelsByKMeans(amountOfClusters, AttributeMatrix);
+                    SaveResultToFile("kmeansAllAttrResult.txt", allAtrLabels);
                     if (AmountOfIndexesCb.SelectedIndex == 1)
                     {
                         valuableAttrLabels = GetLabelsByKMeans(amountOfClusters,
                             GetAttributeMatrixByIndexes(ValuableIndexes));
-                        FillChartAfterClustering(valuableAttrLabels, AllPatientsAfterClusteringChart);
+                        SaveResultToFile("kmeansValuableAttrResult.txt", valuableAttrLabels);
                     }
                     break;
                 case 1:
-                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix);
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix, 1);
+                    allAtrLabels = StandartizeHierarchicLabels(allAtrLabels);
+                    SaveResultToFile("hierarchicAllAttrResult.txt", allAtrLabels);
                     if (AmountOfIndexesCb.SelectedIndex == 1)
                     {
                         valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
-                            GetAttributeMatrixByIndexes(ValuableIndexes));
+                            GetAttributeMatrixByIndexes(ValuableIndexes), 1);
+                        valuableAttrLabels = StandartizeHierarchicLabels(valuableAttrLabels);
+                        SaveResultToFile("hierarchicValuableAttrResult.txt", valuableAttrLabels);
+                    }
+                    break;
+                case 2:
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix, 2);
+                    allAtrLabels = StandartizeHierarchicLabels(allAtrLabels);
+                    SaveResultToFile("hierarchicAllAttrResult.txt", allAtrLabels);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes), 2);
+                        valuableAttrLabels = StandartizeHierarchicLabels(valuableAttrLabels);
+                        SaveResultToFile("hierarchicValuableAttrResult.txt", valuableAttrLabels);
+                    }
+                    break;
+                case 3:
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix, 3);
+                    allAtrLabels = StandartizeHierarchicLabels(allAtrLabels);
+                    SaveResultToFile("hierarchicAllAttrResult.txt", allAtrLabels);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes), 3);
+                        valuableAttrLabels = StandartizeHierarchicLabels(valuableAttrLabels);
+                        SaveResultToFile("hierarchicValuableAttrResult.txt", valuableAttrLabels);
+                    }
+                    break;
+                case 4:
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix, 4);
+                    allAtrLabels = StandartizeHierarchicLabels(allAtrLabels);
+                    SaveResultToFile("hierarchicAllAttrResult.txt", allAtrLabels);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes), 4);
+                        valuableAttrLabels = StandartizeHierarchicLabels(valuableAttrLabels);
+                        SaveResultToFile("hierarchicValuableAttrResult.txt", valuableAttrLabels);
+                    }
+                    break;
+                case 5:
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix, 5);
+                    allAtrLabels = StandartizeHierarchicLabels(allAtrLabels);
+                    SaveResultToFile("hierarchicAllAttrResult.txt", allAtrLabels);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes), 5);
+                        valuableAttrLabels = StandartizeHierarchicLabels(valuableAttrLabels);
+                        SaveResultToFile("hierarchicValuableAttrResult.txt", valuableAttrLabels);
+                    }
+                    break;
+                case 6:
+                    allAtrLabels = GetLabelsByHierarchic(amountOfClusters, AttributeMatrix, 6);
+                    allAtrLabels = StandartizeHierarchicLabels(allAtrLabels);
+                    SaveResultToFile("hierarchicAllAttrResult.txt", allAtrLabels);
+                    if (AmountOfIndexesCb.SelectedIndex == 1)
+                    {
+                        valuableAttrLabels = GetLabelsByHierarchic(amountOfClusters,
+                            GetAttributeMatrixByIndexes(ValuableIndexes), 6);
+                        valuableAttrLabels = StandartizeHierarchicLabels(valuableAttrLabels);
+                        SaveResultToFile("hierarchicValuableAttrResult.txt", valuableAttrLabels);
                     }
                     break;
             }
@@ -271,10 +370,28 @@ namespace Diploma.Presentation
             }
         }
 
-        private int[] GetLabelsByHierarchic(int amountOfClusters, double[][] dataSet)
+        private void SaveResultToFile(string fileName, int[] labels)
+        {
+            using (var sw = new StreamWriter(fileName, false))
+            {
+                foreach (var l in labels)
+                {
+                    sw.WriteLine(l);
+                }
+            }
+        }
+
+        private int[] StandartizeHierarchicLabels(int[] labels)
+        {
+            for (var i = 0; i < labels.Length; i++)
+                labels[i]--;
+            return labels;
+        }
+
+        private int[] GetLabelsByHierarchic(int amountOfClusters, double[][] dataSet, int hierarchicAlgoritmIndex)
         {
             var hierarchic = new AgglomerativeHierarchicAglomera(dataSet, AmountOfPatients);
-            hierarchic.SplitOnClusters();
+            hierarchic.SplitOnClusters(hierarchicAlgoritmIndex);
             return hierarchic.GetLabels(amountOfClusters);
         }
 
@@ -607,7 +724,7 @@ namespace Diploma.Presentation
         private void HierarchicBtn_OnClick(object sender, RoutedEventArgs e)
         {
             Aglomera = new AgglomerativeHierarchicAglomera(AttributeMatrix, AmountOfPatients);
-            Aglomera.SplitOnClusters();
+            Aglomera.SplitOnClusters(6);
             
             var silhouetteList = new List<HierarchicSilhouetteViewModel>();
             var daviesBouldinList = new List<HierarchicDaviesBouldinViewModel>();
